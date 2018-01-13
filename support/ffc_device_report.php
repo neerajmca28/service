@@ -1,0 +1,318 @@
+<?php
+include("../connection.php");
+include_once(__DOCUMENT_ROOT.'/include/header.inc.php');
+include_once(__DOCUMENT_ROOT.'/include/leftmenu.php');
+include_once(__DOCUMENT_ROOT.'/sqlconnection.php');
+
+/*include($_SERVER['DOCUMENT_ROOT']."/service/include/header.inc.php");
+include($_SERVER['DOCUMENT_ROOT']."/service/include/leftmenu.php");  
+include($_SERVER["DOCUMENT_ROOT"]."/service/sqlconnection.php");*/
+$mode=$_GET['mode']; 
+
+
+if(isset($_POST['submit'])) 
+{
+    $ffc_id="";
+    for ($j = 0; $j < count($_POST['ffc_check']); $j++) 
+    {
+        $ffc_id.= "'".$_POST['ffc_check'][$j]."',";
+    }
+    
+     $ffc_data=substr($ffc_id,0,strlen($ffc_id)-1);
+        
+    $fc_query = select_query_inventory("select distinct(device.device_imei),device_repair.client_name, device.recd_date, device.device_id, TIMESTAMPDIFF(MONTH, device.recd_date, NOW()) as age from inventory.device  join inventory.device_repair on device.device_id=device_repair.device_id where is_permanent=1 and device_repair.current_record=1 and device.device_id in($ffc_data)");
+     
+     for($fc=0;$fc<count($fc_query);$fc++)
+     {
+         
+     $device_warranty = select_query_live_con("SELECT sys_added_date, TIMESTAMPDIFF( DAY, sys_added_date, NOW()) as age, veh_reg, imei,
+     sys_group_id, name FROM matrix.group_services LEFT JOIN  matrix.services ON group_services.sys_service_id=services.id LEFT JOIN 
+     matrix.`group` ON `group`.id=group_services.sys_group_id LEFT JOIN  matrix.devices ON services.sys_device_id =devices.id WHERE 
+     devices.imei ='".$fc_query[$fc]['device_imei']."' AND sys_parent_group_id=1 AND sys_group_id!=1998 LIMIT 0,1");
+	
+    
+	 if(count($device_warranty)==0)
+     {
+		$device_warranty = select_query_live_con("SELECT sys_added_date, TIMESTAMPDIFF( DAY, sys_added_date, NOW()) as age, veh_reg, imei,
+    sys_group_id, name FROM matrix.group_services LEFT JOIN  matrix.services ON group_services.sys_service_id=services.id LEFT JOIN 
+    matrix.`group` ON `group`.id=group_services.sys_group_id LEFT JOIN  matrix.devices ON services.sys_device_id =devices.id WHERE 
+    devices.imei ='_".$fc_query[$fc]['device_imei']."' AND sys_parent_group_id=1 AND sys_group_id!=1998 LIMIT 0,1");
+     }
+
+	 if($device_warranty[0]['sys_added_date'] == ''){ $imei_old_installtion_date = '0000-00-00 00:00:00';}
+	 else { $imei_old_installtion_date = $device_warranty[0]['sys_added_date'];}
+
+
+     select_query_inventory("insert into inventory.device_replace_ffc(old_client_name, imei_no, old_veh, ffc_date, imei_old_installtion_date) 
+     values('".$fc_query[$fc]['client_name']."','".$fc_query[$fc]['device_imei']."','".$device_warranty[0]['veh_reg']."','".date("Y-m-d H:i:s")."',
+     '".$imei_old_installtion_date."')");
+     
+     $Updateapprovestatus="update inventory.device set is_ffc='1',device_status='69' where device_id='".$fc_query[$fc]['device_id']."'";
+     select_query_inventory($Updateapprovestatus);
+     select_query_inventory("update inventory.device_repair set device_status=69 where current_record=1 and 
+     device_imei='".$fc_query[$fc]['device_imei']."'");
+     
+     
+     /*mssql_query("insert into device_replace_ffc(old_client_name, imei_no, old_veh, ffc_date, imei_old_installtion_date) 
+     values('".$fc_query[$fc]['client_name']."','".$fc_query[$fc]['device_imei']."','".$device_warranty[0]['veh_reg']."','".date("Y-m-d H:i:s")."',
+     '".$device_warranty[0]['sys_added_date']."')");
+     
+     mssql_query($Updateapprovestatus);
+     mssql_query("update device_repair set device_status=69 where current_record=1 and device_imei='".$fc_query[$fc]['device_imei']."'");*/
+     
+     
+          
+    }
+    echo "<script>document.location.href ='ffc_device_report.php'</script>";
+}
+
+
+$ffc_done_stock = select_query_inventory("select * from inventory.device where is_ffc='1' and is_permanent='1' and device_status in (99,100)");
+
+$ffc_device_replace = select_query_inventory("select * from inventory.device where is_ffc='1' and is_permanent='1' and device_status in (69)");
+
+$ffc_device_atBranch = select_query_inventory("select * from inventory.device where is_ffc='1' and is_permanent='1' and device_status in (63)");
+
+$ffc_device_withinstaller = select_query_inventory("select * from inventory.device where is_ffc='1' and is_permanent='1' and device_status in (64)");
+
+?> 
+<script>
+ 
+function ConfirmFFCdevice(row_id)
+{
+  var x = confirm("Is FFC Device?");
+  if (x)
+  {
+  ConfirmDevice(row_id);
+      return ture;
+  }
+  else
+    return false;
+}
+
+function ConfirmDevice(row_id)
+{
+    //alert(user_id);
+    //return false;
+$.ajax({
+        type:"GET",
+        url:"userInfo.php?action=ffcDeviceConfirmation",
+         data:"row_id="+row_id,
+        success:function(msg){
+         
+        location.reload(true);        
+        }
+    });
+}
+</script>
+<!--<style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}-->
+</style>
+<form name="myform" action="" method="post">
+
+<div class="top-bar">
+        <h1>Permanent FFC : <?=$mode; ?></h1>
+        <br/>
+        
+        <table border="1" cellpadding="5" cellspacing="5"  class="display">
+            <th colspan="8">FFC Device Summary</th>
+            <tr>
+                <td width="20%">FFC Done(At Stock)</td>
+                <td><?=count($ffc_done_stock);?></td>
+            
+                <td>FFC Pending for Replace</td>
+                <td><?=count($ffc_device_replace);?></td>
+            
+                <td>FFC Device(At BRANCHES)</td>
+                <td><?=count($ffc_device_atBranch);?></td>
+                
+                <td>FFC Device(With INSTALLERS)</td>
+                <td><?=count($ffc_device_withinstaller);?></td>
+            </tr>
+        </table>
+        
+        <br/>
+
+            <div align="right">
+                <input type="submit" name="submit" id="submit" value="Submit" />
+            </div>
+
+        
+        <div style="float:center">
+                      <div align="center"><br/>
+                         <a href="ffc_device_report.php?mode=Branch_Device">Branch Device
+                         <? $sql_pending = select_query_inventory("select COUNT(*) as total from inventory.device join inventory.device_repair 
+                                on device.device_id=device_repair.device_id where is_permanent=1 and device_repair.current_record=1 and 
+                                device.device_status not in(70,95,94,97,96,65,57,63,64,100) and dispatch_branch='".$_SESSION['BranchId']."'");
+                        ?>
+                         (
+                         <?=$sql_pending[0]['total']?>
+                         )</a> 
+                       
+                    <?php if($_SESSION['BranchId']==1){?>
+                        
+                        || <a href="ffc_device_report.php?mode=All_Device">All Device
+                         <? $sql_pending_all = select_query_inventory("select COUNT(*) as total from inventory.device join inventory.device_repair 
+                                on device.device_id=device_repair.device_id where is_permanent=1 and device_repair.current_record=1 and 
+                                device.device_status not in(70,95,94,97,96,65,57,63,64,100)");
+                        ?>
+                         (
+                         <?=$sql_pending_all[0]['total']?>
+                         )</a>
+                     <?php } ?>
+
+
+                        <br/>
+                      </div>
+                  </div>       
+        
+</div> 
+         
+           <div class="table">
+
+<?php
+ 
+
+if($mode=='') { $mode="Branch_Device"; }
+
+if($mode=='All_Device')
+    {
+        $rs = select_query_inventory("select distinct(device.device_imei), item_master.item_name, device_type, device_repair.client_name, 
+        device_repair.device_removed_problem, device.recd_date, device.device_id, TIMESTAMPDIFF(MONTH,  device.recd_date, NOW()) as age from 
+        inventory.device  join inventory.device_repair on device.device_id=device_repair.device_id left join inventory.item_master on 
+        item_master.item_id=device.device_type where is_permanent=1 and device_repair.current_record=1 and device.device_status 
+        not in(70,95,94,97,96,65,57,63,64,100)");
+    }
+     else
+    {
+        $rs = select_query_inventory("select distinct(device.device_imei), item_master.item_name, device_type, device_repair.client_name, 
+        device_repair.device_removed_problem, device.recd_date, device.device_id, TIMESTAMPDIFF(MONTH,  device.recd_date, NOW()) as age from 
+        inventory.device  join inventory.device_repair on device.device_id=device_repair.device_id left join inventory.item_master on 
+        item_master.item_id=device.device_type where is_permanent=1 and device_repair.current_record=1 and device.device_status 
+        not in(70,95,94,97,96,65,57,63,64,100)and dispatch_branch='".$_SESSION['BranchId']."'");
+    
+    }
+
+
+//echo "<pre>";print_r($rs);die;
+?>
+
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
+    <thead> 
+        <tr>
+            <th>Sl. No</th>
+            <th><font color="#0E2C3C"><b>Client Name </b></font></th>
+            <th><font color="#0E2C3C"><b>Device Imei </b></font></th>
+            <th><font color="#0E2C3C"><b>Device Model </b></font></th>
+            <th><font color="#0E2C3C"><b>Recived Date</b></font></th>
+            <th><font color="#0E2C3C"><b>Age of Device</b></font></th>
+            <th><font color="#0E2C3C"><b>Reason</b></font></th>
+            <th><font color="#0E2C3C"><b>FFC Status </b></font></th>
+            <th><font color="#0E2C3C"><b>FFC Process </b></font></th>
+       
+        </tr>
+    </thead>
+    <tbody>
+
+  
+    <?php 
+    //$i=1;
+    for($i=0;$i<count($rs);$i++) { 
+    
+    ?>  
+
+     <tr align="Center"  <?=$Bgcolor;?> >
+     <td><?php echo $i+1;?></td>
+      
+        <td>&nbsp;<?php echo $rs[$i]['client_name'];?></td>
+        <td>&nbsp;<?php echo $rs[$i]['device_imei'];?></td>
+        <td>&nbsp;<?php echo $rs[$i]['item_name'];?></td>
+        <td>&nbsp;<?php echo $rs[$i]['recd_date'];?></td> 
+        <td>&nbsp;<?php echo $rs[$i]['age']." Months"; ?></td>
+        <td>&nbsp;<?php echo $rs[$i]['device_removed_problem'];?></td>
+        <?php $ffc = select_query_inventory("select is_ffc,device_status from inventory.device where device_id='".$rs[$i]["device_id"]."'"); ?>
+        <td>&nbsp;
+        <!--<a href="#" onclick="return ConfirmFFCdevice(<?php echo $rs[$i]["device_id"];?>);"  >Confirm FFC </a>-->
+        <?php  if($ffc[0]["is_ffc"]==1 && $ffc[0]["device_status"]==69){echo "FFC Done But Pending for Replace as New/Old"; }  
+               else if($ffc[0]['device_status']==66){ echo "Device Removed" ;} 
+               else if($ffc[0]['device_status']==67){ echo "Device Removed Recd" ;} 
+               else if($ffc[0]['device_status']==68){ echo "Open Repair Case" ;}
+               else    if($ffc[0]['device_status']==71){ echo "Replace On Repair Device" ;} 
+               else if($ffc[0]['device_status']==72){ echo "Dead Device Remarks Pending" ;} 
+               else if($ffc[0]['device_status']==75){ echo "Branch Repair" ;} 
+               else if($ffc[0]['device_status']==76){ echo "Device Against Pyment With FFC" ;} 
+               else if($ffc[0]['device_status']==77){ echo "Device Against Pyment Without FFC" ;} 
+               else if($ffc[0]['device_status']==79){ echo "Send To Repair Centre" ;}
+               else if($ffc[0]['device_status']==80){ echo "UnCracked Device" ;} 
+               else if($ffc[0]['device_status']==81){ echo "Branch Repair Status" ;} 
+               else if($ffc[0]['device_status']==82){ echo "Internal Branch Repaired" ;} 
+               else if($ffc[0]['device_status']==83){ echo "Send To Repair By Branch" ;}
+               else if($ffc[0]['device_status']==84){ echo "Device Manufacture" ;} 
+               else if($ffc[0]['device_status']==85){ echo "Device Send To Manufacture" ;}
+               else if($ffc[0]['device_status']==86){ echo "Device IMEI Change by Repair/Manufacture" ;} 
+               //else if($ffc[0]['device_status']==87){ echo "Sim Dispatch" ;}
+               //else if($ffc[0]['device_status']==88){ echo "Sim Recd" ;} 
+               //else if($ffc[0]['device_status']==89){ echo "Sim Reassign" ;}
+               //else if($ffc[0]['device_status']==90){ echo "Sim Servies" ;} else if($ffc[0]['device_status']==91){ echo "Sim Installed" ;}
+               //else if($ffc[0]['device_status']==92){ echo "Sim Deactivation" ;} else if($ffc[0]['device_status']==93){ echo "Sim Repair" ;      
+               else if($ffc[0]['device_status']==99){ echo "Ready For Dispatch FFC AS New" ;} 
+               else if($ffc[0]['device_status']==100){ echo "Ready For Dispatch Replace FFC" ;}
+               else if($ffc[0]['device_status']==103){ echo "Device Removed Kept In Clients Office" ;}
+               else if($ffc[0]['device_status']==104){ echo "Device Delete From Client Account" ;}
+               else if($ffc[0]['device_status']==105){ echo "Device Has been Repaired But Not Received By Stock" ;}
+               else if($ffc[0]['device_status']==116 && $ffc[0]["is_ffc"]==0){ echo "Device Has been Repair and Deposist to Stock Delhi" ;}
+               else if($ffc[0]['device_status']==116 && $ffc[0]["is_ffc"]==1){ echo "CHECK In FFC Device on Dispatch" ;}
+               else if($ffc[0]['device_status']==120){ echo "Missing Device In Inventory" ;}
+               else if($ffc[0]['device_status']==122){ echo "Device Has been Send But Not Received By R and D" ;}
+               
+        ?>
+        </td>
+        <td><?php if($ffc[0]["is_ffc"]!=1 && $ffc[0]["device_status"]==116){?>
+            <input type="checkbox" name="ffc_check[]" id="ffc_check" value="<?php echo $rs[$i]["device_id"];?>" /><?php } ?>
+        </td>
+        
+    </tr>
+        <?php  
+    //$i++;
+        
+        }
+     
+    ?>
+    </tbody>
+</table>
+     
+   <div id="toPopup"> 
+        
+        <div class="close">close</div>
+           <span class="ecs_tooltip">Press Esc to close <span class="arrow"></span></span>
+        <div id="popup1" style ="height:100%;width:100%">  
+
+ 
+        </div>  
+    
+    </div>  
+    
+    <div class="loader"></div>
+       <div id="backgroundPopup"></div>
+</div>
+ 
+ </form>
+ 
+<?
+include("../include/footer.inc.php");
+
+?>
