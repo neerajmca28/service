@@ -2282,16 +2282,18 @@ for($c=0;$c<count($data);$c++)
           $allPaginationLink .= '<a href="javascript:void(0)" '.$current.' onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$pageCounter.'&RowId='.$RowId.'&tablename='.$tablename.'\')">&laquo;</a>&emsp;';
         }
    
-    while($pageCounter <= $totalPages) { 
+    while($pageCounter <= ceil($totalPages)) { 
+
+      //echo $totalPages;
 
         $current = $_GET['page'] == $pageCounter ? 'style="text-decoration: underline;"' : '';
-          if($pageCounter == 1){}else{        
+                 
           $allPaginationLink .= '<a href="javascript:void(0)" '.$current.' onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$pageCounter.'&RowId='.$RowId.'&tablename='.$tablename.'\')">'.$pageCounter.'</a> &emsp;';
-          } 
+          
           $pageCounter++;
     }
-     $current = $_GET['page'] == $totalPages ? 'style="text-decoration: underline;"' : '';      
-       $allPaginationLink .= '<a href="javascript:void(0)" '.$current.' onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$totalPages.'&RowId='.$RowId.'&tablename='.$tablename.'\')">&raquo;</a> &emsp;';
+     $current = $_GET['page'] == (--$pageCounter) ? 'style="text-decoration: underline;"' : '';      
+       $allPaginationLink .= '<a href="javascript:void(0)" '.$current.' onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.--$pageCounter.'&RowId='.$RowId.'&tablename='.$tablename.'\')">&raquo;</a> &emsp;';
      
        
     echo $allPaginationLink;

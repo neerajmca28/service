@@ -65,12 +65,12 @@ $.ajax({
 
 </script>
  <div class="top-bar">
-       <a href="add_installation.php" class="button">ADD NEW </a>
+      
         <h1>Installation Request</h1>
           
     </div>
     <div class="top-bar">
-        
+    <a style="float:right" href="online_crack.php" > Online Crack </a><span style="float:right">||</span><a style="float:right" href="re_addition.php" >Re-Addition </a><span style="float:right">||</span><a style="float:right" href="add_installation.php" >Installation </a><br/>
     <div style="float:right";><font style="color:#ADFF2F;font-weight:bold;">GreenYellow:</font> Urgent Installation</div>
     <br/>
     <div style="float:right";><font style="color:#F2F5A9;font-weight:bold;">Yellow:</font> Back from Admin</div>
