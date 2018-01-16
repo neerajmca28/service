@@ -783,6 +783,19 @@ td {
     padding-left:20px;
 }
 
+.button {
+    background-color: #008CBA;
+    border: none;
+    color: white;
+    padding: 5px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+.button4 {background-color: #e7e7e7; color: black;}
 </style>
 <?
         
@@ -2200,11 +2213,44 @@ else If($tablename=="services_history_tbl")
     <table cellspacing="2" cellpadding="2" style=" padding-left: 100px;width: 500px;">
       <tr>
         <td><?
+
+        // echo $_GET['page'];
 $offset = ($_GET['page'] - 1) * 10;
 $queryString = "select * from matrix.comment where service_id='".$RowId."' order by date desc limit 10 OFFSET ".$offset.";";
 // echo $queryString;
 $data=select_query_live_con($queryString);
 $allRows=select_query_live_con("select * from matrix.comment where service_id='".$RowId."' order by date desc");
+
+################# Pagination By Neeraj_(16/01/2018) ###########################
+
+    $totalRows = count($allRows);
+    $rowsPerPage = 10;
+    $totalPages = ceil($totalRows / $rowsPerPage);
+    $pageCounter = 1;
+    $allPaginationLink = '';
+    $currentPage = $_GET['page'];
+    $pevPage = ($currentPage - 1);  
+    
+    if(ceil($totalPages) > 1){
+          
+          $htmlBody.= '<br><br><button class="button" onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$pageCounter.'&RowId='.$RowId.'&tablename='.$tablename.'\')">First</button>'; 
+          
+          if($currentPage < $totalPages){
+          $htmlBody.= '<button class="button" onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.++$currentPage.'&RowId='.$RowId.'&tablename='.$tablename.'\')">Next</button>';
+          }
+           if($_GET['page'] > 1){
+          $htmlBody.= '<button class="button" onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$pevPage.'&RowId='.$RowId.'&tablename='.$tablename.'\')">Previous</button>';
+          }
+          
+          $htmlBody.= '<button class="button" onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$totalPages.'&RowId='.$RowId.'&tablename='.$tablename.'\')">Last</button>'; 
+
+          $htmlBody.= '<button class="button button4">'."<b>Page ".$_GET['page']." of ". $totalPages."</b></button>";  
+
+          
+       
+    }
+
+################################################################################
 
 if(count($data)>0)
 {
@@ -2224,7 +2270,11 @@ for($c=0;$c<count($data);$c++)
 
     echo '<hr>&nbsp;</hr>';*/
     }
+    //echo '<tr><th colspan="3" style="border-collapse: collapse;">'.$htmlBody.'</th></tr>';
     echo '</table>';
+    echo '<table cellspacing="0" cellpadding="0" border="0" width="100%" >';
+    echo '<tr><th colspan="3" style="border-collapse: collapse;">'.$htmlBody.'</th></tr>';
+    echo '</table>';    
 
  }
  else
@@ -2237,67 +2287,7 @@ for($c=0;$c<count($data);$c++)
       </tr>
     </table>
 <?php
-    $totalRows = count($allRows);
-    $rowsPerPage = 10;
-    $totalPages = $totalRows / $rowsPerPage;
-    $pageCounter = 1;
-    $allPaginationLink = '';
-
-    // $last = ceil($totalPages);
-    // //echo "###";
-    // $start      = ( ( $pageCounter -  $rowsPerPage ) > 0 ) ? $pageCounter -  $rowsPerPage : 1;
-    // // echo "###";
-    // $end        = ( ( $pageCounter +  $rowsPerPage ) < $last ) ? $pageCounter +  $rowsPerPage : $last;
-
-    // $html       = '<ul class="' . $list_class . '">';
- 
-    // $class      = ($rowsPerPage == 1 ) ? "disabled" : "";
-    // $html       .= '<li class="' . $class . '"><a href="?limit=' .$rowsPerPage  . '&page=' . ( $rowsPerPage - 1 ) . '">&laquo;</a></li>';
- 
-    // if ( $start > 1 ) {
-    //     $html   .= '<li><a href="?limit=' . $rowsPerPage  . '&page=1">1</a></li>';
-    //     $html   .= '<li class="disabled"><span>...</span></li>';
-    // }
- 
-    // for ( $i = $start ; $i <= $end; $i++ ) {
-    //     $class  = ( $rowsPerPage == $i ) ? "active" : "";
-    //     $html   .= '<li class="' . $class . '"><a href="?limit=' . $rowsPerPage  . '&page=' . $i . '">' . $i . '</a></li>';
-    // }
- 
-    // if ( $end < $last ) {
-    //     $html   .= '<li class="disabled"><span>...</span></li>';
-    //     $html   .= '<li><a href="?limit=' . $rowsPerPage  . '&page=' . $last . '">' . $last . '</a></li>';
-    // }
- 
-    // $class      = ( $rowsPerPage == $last ) ? "disabled" : "";
-    // $html       .= '<li class="' . $class . '"><a href="?limit=' . $rowsPerPage  . '&page=' . ( $rowsPerPage + 1 ) . '">&raquo;</a></li>';
- 
-    // $html       .= '</ul>';
-
-    // echo $html;
-
-    if(ceil($totalPages) > 1){
-      $current = $_GET['page'] == $pageCounter ? 'style="text-decoration: underline;"' : '';
-      if($pageCounter == 1){
-          $allPaginationLink .= '<a href="javascript:void(0)" '.$current.' onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$pageCounter.'&RowId='.$RowId.'&tablename='.$tablename.'\')">&laquo;</a>&emsp;';
-        }
-   
-    while($pageCounter <= ceil($totalPages)) { 
-
-      //echo $totalPages;
-
-        $current = $_GET['page'] == $pageCounter ? 'style="text-decoration: underline;"' : '';
-                 
-          $allPaginationLink .= '<a href="javascript:void(0)" '.$current.' onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$pageCounter.'&RowId='.$RowId.'&tablename='.$tablename.'\')">'.$pageCounter.'</a> &emsp;';
-          
-          $pageCounter++;
-    }
-     $current = $_GET['page'] == (--$pageCounter) ? 'style="text-decoration: underline;"' : '';      
-       $allPaginationLink .= '<a href="javascript:void(0)" '.$current.' onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.--$pageCounter.'&RowId='.$RowId.'&tablename='.$tablename.'\')">&raquo;</a> &emsp;';
-     
-       
-    echo $allPaginationLink;
-  }
+    
 ?>
 
   </div>
