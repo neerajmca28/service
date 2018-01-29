@@ -12,16 +12,26 @@ $comment=$_GET["comment"];
 
 ########### ReAddition #############
 
+
+if(isset($_GET['action']) && $_GET['action']=='countDeletedImei')
+{
+
+    $sql="select imei from deletion where final_status=1 and user_id=".$row_id;
+    $row=select_query($sql);  
+    echo json_encode($row);
+}
+
+
 if(isset($_GET['action']) && $_GET['action']=='getAllImei')
-  {    
-    //echo 'tt'; die;
+  {
+   // echo "tt";die;
     $device_imei_data=array();
     $userId=$_GET['userId'];
-    $deviceStatus=$_GET['dStatus'];   
+    $deviceStatus=$_GET['dStatus'];
     //$sql="select distinct(imei) from deletion where user_id=".$userId;
 
     $deactive_query = select_query_live_con("SELECT sys_service_id FROM matrix.group_services WHERE active=0 AND sys_group_id=(SELECT sys_group_id FROM matrix.group_users where sys_user_id='".$userId."')");
-      
+
           //print_r($deactive_query); die;
     //echo count($deactive_query);die;
 
@@ -39,7 +49,7 @@ if(isset($_GET['action']) && $_GET['action']=='getAllImei')
             $device_get_query = select_query_live_con("SELECT id,sys_device_id FROM matrix.services WHERE id IN ('".$veh_id_data."')");
 
             //print_r($device_get_query);die;
-           
+
             $sys_device_id = "";
             $sys_device_id_data='';
             for($de=0;$de<count($device_get_query);$de++)
@@ -50,9 +60,11 @@ if(isset($_GET['action']) && $_GET['action']=='getAllImei')
 
             $sys_device_id_data=substr($sys_device_id,0,strlen($sys_device_id)-3);
             //echo $sys_device_id_data; die;
-           
+
             $sys_device_imei = "";
             $sys_device_imei_data='';
+
+            //echo "SELECT device_imei FROM matrix.device_mapping WHERE device_id IN ('".$sys_device_id_data."')";die;
 
             $sys_device_imei_arr= select_query_live_con("SELECT device_imei FROM matrix.device_mapping WHERE device_id IN ('".$sys_device_id_data."')");
 
@@ -63,11 +75,11 @@ if(isset($_GET['action']) && $_GET['action']=='getAllImei')
             }
 
             $sys_device_imei_data =substr($sys_device_imei,0,strlen($sys_device_imei)-3);
-  
+
             $IMEI =  "'".$sys_device_imei_data."'";
 
             if(count($sys_device_imei_arr) > 0){
-            
+
               if($deviceStatus == 1){
                 //echo "SELECT device_imei FROM inventory.device WHERE device_status IN (57,63,64) and device_imei IN ($IMEI)";die;
                 $result=select_query_inventory("SELECT device_imei FROM inventory.device WHERE device_status IN (57,63,64) and device_imei IN ($IMEI)");
@@ -78,25 +90,25 @@ if(isset($_GET['action']) && $_GET['action']=='getAllImei')
                //echo "SELECT device_imei FROM inventory.device WHERE device_status IN (103) and device_imei IN ($IMEI)";die;
                 $result=select_query_inventory("SELECT device_imei FROM inventory.device WHERE device_status IN (103) and device_imei IN ($IMEI)");
                 //print_r($result);die;
-                
-              } 
 
-            } 
-            echo json_encode($result); 
+              }
+
+            }
+            echo json_encode($result);
   }
 
 
   if(isset($_GET['action']) && $_GET['action']=='imeiDeviceType')
-  { 
-      $imei=$_GET['imeiNo']; 
+  {
+      $imei=$_GET['imeiNo'];
 
-     $query="select device_type from inventory.device where device_imei=".$imei; 
+     $query="select device_type from inventory.device where device_imei=".$imei;
      //echo $query; die;
 
     $deviceType=select_query_inventory($query);
    // echo '<pre>'; print_r($deviceType); die;
 
-     $sql="select im.item_id,im.item_name as childName,imm.item_name as parentName from inventory.item_master as im,inventory.item_master as imm where im.item_id='".$deviceType[0]['device_type']."' and imm.item_id=im.parent_id";      
+     $sql="select im.item_id,im.item_name as childName,imm.item_name as parentName from inventory.item_master as im,inventory.item_master as imm where im.item_id='".$deviceType[0]['device_type']."' and imm.item_id=im.parent_id";
      // echo $sql; die;
 
       $row=select_query_inventory($sql);
@@ -105,14 +117,14 @@ if(isset($_GET['action']) && $_GET['action']=='getAllImei')
   }
 
   if(isset($_GET['action']) && $_GET['action']=='imeiModelName')
-  { 
+  {
     $imei=$_GET['imeiNo'];
 
     $query="select device_type from inventory.device where device_imei=".$imei;
 
     $deviceType=select_query_inventory($query);
 
-    $sql="select im.item_id,im.item_name as childName,imm.item_name as parentName from inventory.item_master as im,inventory.item_master as imm where im.item_id='".$deviceType[0]['device_type']."' and imm.item_id=im.parent_id";     
+    $sql="select im.item_id,im.item_name as childName,imm.item_name as parentName from inventory.item_master as im,inventory.item_master as imm where im.item_id='".$deviceType[0]['device_type']."' and imm.item_id=im.parent_id";
     $row=select_query_inventory($sql);
 
     echo $row[0]['childName'];
@@ -120,40 +132,119 @@ if(isset($_GET['action']) && $_GET['action']=='getAllImei')
 
 
 if(isset($_GET['action']) && $_GET['action']=='imeistatus')
-  {   
+  {
    $imei=$_GET['imeiNo'];
-   $sql="SELECT device_status from inventory.device where device_imei=".$imei; 
-  
-   $row=select_query_inventory($sql); 
+   $sql="SELECT device_status from inventory.device where device_imei=".$imei;
+
+   $row=select_query_inventory($sql);
 
   if($row[0]['device_status'] == '103')
-    {    
-      echo "Client Office"; 
-    } 
+    {
+      echo "Client Office";
+    }
     else if($row[0]['device_status'] == '65')
-    {    
-      echo "Device Installed";  
-    } 
+    {
+      echo "Device Installed";
+    }
     else if($row[0]['device_status'] == '57')
-      {    
-        echo "G-TRAC";  
-      } 
+      {
+        echo "G-TRAC";
+      }
     else if($row[0]['device_status'] == '63')
-      {    
-        echo "G-TRAC";  
-      } 
+      {
+        echo "G-TRAC";
+      }
       else if($row[0]['device_status'] == '64')
-      {    
-        echo "G-TRAC";  
-      } 
+      {
+        echo "G-TRAC";
+      }
       else if($row[0]['device_status'] == '116')
-      {   
-        echo "G-TRAC";  
-      } 
+      {
+        echo "G-TRAC";
+      }
       else
       {   echo "Under Process";
       }
   }
+
+// if(isset($_GET['action']) && $_GET['action']=='toolsAccessories')
+// {
+
+//   $toolName=array();
+
+//   //print_r($toolName);
+// //echo "select accessories_tollkit from new_account_creation where user_id=".$q; die;
+//   $sql=select_query("select accessories_tollkit from new_account_creation where user_id=".$q);
+// if(count($sql)>0)
+//   {
+//   $toolkitId = explode("#",$sql[0]['accessories_tollkit']);
+
+//   for($i=0;$i<=count($toolkitId)-1;$i++){
+
+//     $sqlToolsName=select_query("select * from toolkit_access where id='".$toolkitId[$i]."'");
+
+//       $data = array(
+
+//         "item_id"=>$sqlToolsName[0]['id'],
+//         "item_name"=>$sqlToolsName[0]['items']
+
+//       );
+
+//       array_push($toolName,$data);
+
+//     }
+//     echo json_encode($toolName);
+//   }
+//   else
+//   {
+//     echo '0';
+//   }
+
+
+
+// }
+
+// if(isset($_GET['action']) && $_GET['action']=='deviceName')
+// {
+//     $userId=$_GET["user_id"];
+
+//     // $sql2="SELECT dtype.id as dev_type_id,dtype.device_type as deviceType FROM new_account_model_master as newmodel LEFT JOIN device_type as dtype ON newmodel.device_type=dtype.id WHERE new_account_reqid='".$userId."'";
+//     // //echo $sql2; die;
+//     // $row2=select_query($sql2);
+//     // echo json_encode($row2);
+
+//     $select=select_query("select id from $internalsoftware.new_account_creation where user_id='".$userId."' ");
+//     $acc_req_id=$select[0]['id'];
+
+//     //  $select=select_query("select new_account_reqid from $internalsoftware.new_account_model_master where user_id='".$userId."' ");
+//     // $acc_req_id=$select[0]['id'];
+
+//   $sql2="SELECT distinct dtype.item_id as dev_type_id,dtype.item_name as deviceType FROM new_account_model_master as newmodel LEFT JOIN item_master as dtype ON newmodel.device_type=dtype.item_id WHERE new_account_reqid='".$acc_req_id."'";
+//     //echo $sql2; die;
+//     $row2=select_query($sql2);
+//     echo '<pre>'; print_r($row2);die;
+//     echo json_encode($row2);
+// }
+
+// if(isset($_GET['action']) && $_GET['action']=='modelname')
+// {
+//     $dev_type_id=$_GET["dev_type"];
+//     $userId1=$_GET["user_id"];
+
+//     $select=select_query("select id from $internalsoftware.new_account_creation where user_id='".$userId1."' ");
+//     $acc_req_id=$select[0]['id'];
+//     // $sql2="SELECT dm.id as model_id,dm.device_model as model_name from new_account_model_master as newmodel inner join device_model as dm  ON newmodel.device_model=dm.id WHERE newmodel.new_account_reqid='".$userId1."' and dm.parent_id='".$dev_type_id."'" ;
+//     // //echo $sql2; die;
+//     // $row2=select_query($sql2);
+//     // echo json_encode($row2);
+
+//       $sql2="SELECT dm.item_id as model_id,dm.item_name as model_name from new_account_model_master as newmodel inner join item_master as dm  ON newmodel.device_model=dm.item_id WHERE newmodel.new_account_reqid='".$acc_req_id."' and dm.parent_id='".$dev_type_id."'" ;
+//     //echo $sql2; die;
+//     $row2=select_query($sql2);
+//     echo json_encode($row2);
+// }
+
+################################################# 
 
 if(isset($_GET['action']) && $_GET['action']=='toolsAccessories')
 {

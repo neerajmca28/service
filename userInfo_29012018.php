@@ -20,104 +20,6 @@ $row_id=$_GET["row_id"];
 $comment=$_GET["comment"];
 
 
-
-if(isset($_GET['action']) && $_GET['action']=='toolsAccessories')
-{
-
-  $toolName=array();
-
-  //print_r($toolName);
-//echo "select accessories_tollkit from new_account_creation where user_id=".$q; die;
-  $sql=select_query("select accessories_tollkit from new_account_creation where user_id=".$q);
-  // echo '<pre>'; print_r($sql); die;
-if(count($sql)>0)
-  {
-  $toolkitId = explode("#",$sql[0]['accessories_tollkit']);
-
-  for($i=0;$i<=count($toolkitId)-1;$i++){
-
-    $sqlToolsName=select_query("select * from toolkit_access where id='".$toolkitId[$i]."'");
-  
-      $data = array(
-
-        "item_id"=>$sqlToolsName[0]['id'],
-        "item_name"=>$sqlToolsName[0]['items']
-
-      );
-
-      array_push($toolName,$data);
-
-    }
-   // echo json_encode($toolName);
-  }
-  // else
-  // {
-  //   echo '0';
-  // }
-   if(count($toolName)>0)
-      {
-        echo json_encode($toolName);
-      }
-    else
-      {
-         // echo '[{"item_id":"","item_name":""}]';
-        echo '0';
-      }
-
-  
-
-}
-if(isset($_GET['action']) && $_GET['action']=='deviceName')
-{ 
-     $userId=$_GET["user_id"]; 
- 
-    // $sql2="SELECT dtype.id as dev_type_id,dtype.device_type as deviceType FROM new_account_model_master as newmodel LEFT JOIN device_type as dtype ON newmodel.device_type=dtype.id WHERE new_account_reqid='".$userId."'"; 
-    // //echo $sql2; die;
-    // $row2=select_query($sql2);  
-    // echo json_encode($row2);
-  $select=select_query("select id from $internalsoftware.new_account_creation where user_id='".$userId."' ");
-    $acc_req_id=$select[0]['id'];
-
-  $sql2="SELECT distinct dtype.item_id as dev_type_id,dtype.item_name as deviceType FROM new_account_model_master as newmodel LEFT JOIN item_master as dtype ON newmodel.device_type=dtype.item_id WHERE new_account_reqid='".$acc_req_id."'"; 
-    //echo $sql2; die;
-    $row2=select_query($sql2);  
-
-    //echo json_encode($row2);
-
-    if(count($row2)>0)
-      {
-        echo json_encode($row2);
-      }
-    else
-      {
-         echo '[{"dev_type_id":"","deviceType":""}]';
-      }
-}
-
-if(isset($_GET['action']) && $_GET['action']=='modelname')
-{ 
-    $dev_type_id=$_GET["dev_type"];
-    $userId1=$_GET["user_id"]; 
-     $select=select_query("select id from $internalsoftware.new_account_creation where user_id='".$userId1."' ");
-    $acc_req_id=$select[0]['id'];
-    // $sql2="SELECT dm.id as model_id,dm.device_model as model_name from new_account_model_master as newmodel inner join device_model as dm  ON newmodel.device_model=dm.id WHERE newmodel.new_account_reqid='".$userId1."' and dm.parent_id='".$dev_type_id."'" ;
-    // //echo $sql2; die;
-    // $row2=select_query($sql2);  
-    // echo json_encode($row2);
-
-      $sql2="SELECT dm.item_id as model_id,dm.item_name as model_name from new_account_model_master as newmodel inner join item_master as dm  ON newmodel.device_model=dm.item_id WHERE newmodel.new_account_reqid='".$acc_req_id."' and dm.parent_id='".$dev_type_id."'" ;
-    //echo $sql2; die;
-    $row2=select_query($sql2);  
-    if(count($row2)>0)
-      {
-        echo json_encode($row2);
-      }
-    else
-      {
-         echo '[{"dev_type_id":"","deviceType":""}]';
-      }
-}
-
 if(isset($_GET['action']) && $_GET['action']=='salespersonname')
 {
   $sql="SELECT name AS 'sales_person_name' FROM addclient ac LEFT JOIN sales_person sp ON ac.sales_person_id = sp.id  WHERE ac.Userid=".$q;
@@ -133,21 +35,19 @@ if(isset($_GET['action']) && $_GET['action']=='onlineCrackRND')
      $inst_req_id=$_GET["RowId"];
   
     //echo "update internalsoftware.installation set installation_status=11 where inst_req_id='".$inst_req_id."' "; die;
-      $UpdateOnlineCrackStatus=mysql_query("update $internalsoftware.installation set installation_status=11 where id='".$inst_req_id."' ");
+      $UpdateOnlineCrackStatus=mysql_query("update internalsoftware.installation set installation_status=11 where id='".$inst_req_id."' ");
     //if(mysql_query($Updateapprovestatus))
     echo "Successfully Sent to R&D";
   
  }
-
-
-if(isset($_GET['action']) && $_GET['action']=='debugComment')
+ if(isset($_GET['action']) && $_GET['action']=='debugComment')
 {
-	$Comment_by=$_SESSION['username'];
-	
-	//$Updateapprovestatus="update device_lost set account_comment='".addslashes($comment)."' where id=".$row_id;
-	$Updateapprovestatus="insert into matrix.comment(service_id,comment,comment_by) values('".$row_id."','".addslashes($comment)."','".$Comment_by."')";
-	//if(mysql_query($Updateapprovestatus))
-	echo "Comment Added Successfully";
+    $Comment_by=$_SESSION['username'];
+  
+    //$Updateapprovestatus="update device_lost set account_comment='".addslashes($comment)."' where id=".$row_id;
+      $Updateapprovestatus="insert into matrix.comment(service_id,comment,comment_by) values('".$row_id."','".addslashes($comment)."','".$Comment_by."')";
+    //if(mysql_query($Updateapprovestatus))
+    echo "Comment Added Successfully";
   
  }
 
@@ -253,7 +153,7 @@ for($N=1;$N<=$_GET["RowId"];$N++)
     }
     $sys_device_id_data=substr($sys_device_id,0,strlen($sys_device_id)-3);
    
-    $result = select_query_live_con("SELECT device_imei FROM matrix.device_mapping WHERE device_id IN ('".$sys_device_id_data."')"); 
+    $result = select_query_live_con("SELECT device_imei FROM matrix.device_mapping WHERE device_id IN ('".$sys_device_id_data."')");
    
     /*$imei_no_row = "";
     while($imei_get_row = mysql_fetch_array($imei_query))
@@ -387,16 +287,19 @@ if(isset($_GET['action']) && $_GET['action']=='DetailInstalltion')
     {
        
          $msg.=" <tr><td><input type='text' name='Veh_name$N' required></td><td>";
-  
-        $assign_device = select_query_inventory("select device.device_id, device.device_imei, device.itgc_id, sim.sim_no, device.dispatch_date, 
-                    installerid from inventory.ChallanDetail left join inventory.device on ChallanDetail.deviceid=device.device_id left join inventory.sim on 
-                    device.sim_id=sim.sim_id where  device.device_status=64 and ChallanDetail.branchid=".$_SESSION['BranchId']." and  
-                    ChallanDetail.CurrentRecord=1 and ChallanDetail.installerid=".$InstallerId);
+  // echo "select device.device_id, device.device_imei, device.itgc_id, sim.sim_no, device.dispatch_date,
+  //                   installerid from inventory.ChallanDetail left join inventory.device on ChallanDetail.deviceid=device.device_id left join inventory.sim on
+  //                   device.sim_id=sim.sim_id where  device.device_status=64 and ChallanDetail.branchid='".$_SESSION['BranchId']."' and  
+  //                   ChallanDetail.CurrentRecord=1 and ChallanDetail.installerid='".$InstallerId."' "; die;
+        $assign_device = select_query_inventory("select device.device_id, device.device_imei, device.itgc_id, sim.sim_no, device.dispatch_date,
+                    installerid from inventory.challandetail left join inventory.device on challandetail.deviceid=device.device_id left join inventory.sim on
+                    device.sim_id=sim.sim_id where  device.device_status=64 and challandetail.branchid='".$_SESSION['BranchId']."' and  
+                    challandetail.CurrentRecord=1 and challandetail.installerid='".$InstallerId."' ");
 
 
         $msg.=" <select  name='DeviceIMEI$N' required>
                     <option value=''>Select imei</option>";
-	
+
         for($aid=0;$aid<count($assign_device);$aid++)
         {
         
@@ -452,7 +355,7 @@ if(isset($_GET['action']) && $_GET['action']=='ReInstalltion')
         $msg.=" <tr><td><input type='text' name='Veh_name$N' required></td><td>";
   
        
-        $deactive_query = select_query_live_con("SELECT sys_service_id FROM matrix.group_services WHERE active=0 AND 
+        $deactive_query = select_query_live_con("SELECT sys_service_id FROM matrix.group_services WHERE active=0 AND
                             sys_group_id=(SELECT sys_group_id FROM matrix.group_users where sys_user_id='".$UserId."')");
        
         $veh_id_get = "";
@@ -473,7 +376,7 @@ if(isset($_GET['action']) && $_GET['action']=='ReInstalltion')
         }
         $sys_device_id_data=substr($sys_device_id,0,strlen($sys_device_id)-3);
        
-        $result = select_query_live_con("SELECT device_imei FROM matrix.device_mapping WHERE device_id IN ('".$sys_device_id_data."')"); 
+        $result = select_query_live_con("SELECT device_imei FROM matrix.device_mapping WHERE device_id IN ('".$sys_device_id_data."')");
    
 
         $msg.=" <select  name='DeviceIMEI$N' required>
@@ -516,11 +419,11 @@ if(isset($_GET['action']) && $_GET['action']=='sim_change_dropdown')
 {
 
    $InstallerId=$_GET["InstallerId"];
-  
-   $sim_no = select_query_inventory("select sim.sim_no, sim.phone_no, sim.sim_id, installerid from inventory.SimChallanDetail left join inventory.sim on 
-                         SimChallanDetail.sim_id=sim.sim_id where  sim.Sim_Status=90 and SimChallanDetail.branchid='".$_SESSION['BranchId']."' 
-                    and SimChallanDetail.installerid='".$InstallerId."' and sim.flag=1 AND sim.active_status=1 and sim.is_testsim=0 and 
-                    SimChallanDetail.CurrentRecord=1");
+
+   $sim_no = select_query_inventory("select sim.sim_no, sim.phone_no, sim.sim_id, installerid from inventory.simchallandetail left join inventory.sim on
+                         simchallandetail.sim_id=sim.sim_id where  sim.Sim_Status=90 and simchallandetail.branchid='".$_SESSION['BranchId']."'
+                    and simchallandetail.installerid='".$InstallerId."' and sim.flag=1 AND sim.active_status=1 and sim.is_testsim=0 and
+                    simchallandetail.CurrentRecord=1");
 
     $msg.=" <table><tr><td>
             <select  name='sim_no' id='sim_no'>
@@ -549,18 +452,18 @@ if(isset($_GET['action']) && $_GET['action']=='replace_FFC_device')
     {
          $device_type = '79,69,86,95,93,0';
           
-         $replace_other = select_query_inventory("SELECT DISTINCT(device.device_imei), item_name,device.recd_date, 
-               TIMESTAMPDIFF(MONTH,device.recd_date,'".$device_warranty_date."') AS age FROM inventory.device left join inventory.item_master on 
-                item_master.item_id=device.device_type WHERE is_ffc=1 AND TIMESTAMPDIFF(MONTH,device.recd_date,'".$device_warranty_date."') >=0 
-                AND active_status=1 and device_status='69' and device_type in(select item_id from inventory.item_master where parent_id 
+         $replace_other = select_query_inventory("SELECT DISTINCT(device.device_imei), item_name,device.recd_date,
+                 TIMESTAMPDIFF(MONTH,device.recd_date,'".$device_warranty_date."') AS age FROM inventory.device left join inventory.item_master on
+                item_master.item_id=device.device_type WHERE is_ffc=1 AND TIMESTAMPDIFF(MONTH,device.recd_date,'".$device_warranty_date."') >=0
+                AND active_status=1 and device_status='69' and device_type in(select item_id from inventory.item_master where parent_id
                 not in($device_type)) and dispatch_branch='".$_SESSION['BranchId']."' order by age asc");
     }
     else
     {
-           $replace_other = select_query_inventory("SELECT DISTINCT(device.device_imei), item_name, device.recd_date, 
-                TIMESTAMPDIFF(MONTH,device.recd_date,'".$device_warranty_date."') AS age FROM inventory.device left join inventory.item_master on 
-                item_master.item_id=device.device_type WHERE is_ffc=1 AND TIMESTAMPDIFF(MONTH,device.recd_date,'".$device_warranty_date."') >=0 
-                AND active_status=1 and device_status='69' and device_type in(select item_id from inventory.item_master where 
+           $replace_other = select_query_inventory("SELECT DISTINCT(device.device_imei), item_name, device.recd_date,
+                   TIMESTAMPDIFF(MONTH,device.recd_date,'".$device_warranty_date."') AS age FROM inventory.device left join inventory.item_master on
+                item_master.item_id=device.device_type WHERE is_ffc=1 AND TIMESTAMPDIFF(MONTH,device.recd_date,'".$device_warranty_date."') >=0
+                AND active_status=1 and device_status='69' and device_type in(select item_id from inventory.item_master where
                 parent_id='".$DeviceModel."') and dispatch_branch='".$_SESSION['BranchId']."' order by age asc");
  
     }
@@ -594,9 +497,9 @@ if(isset($_GET['action']) && $_GET['action']=='DetailClient')
    
    if($branch_id != "")
    {
-       $query = select_query("select * from $internalsoftware.installer where branch_id='".$branch_id."' and is_delete=1 order by inst_name asc");
+       $query = select_query("select * from internalsoftware.installer where branch_id='".$branch_id."' and is_delete=1 order by inst_name asc");
       
-       $main_user_data = select_query("SELECT Userid AS user_id,UserName AS name FROM $internalsoftware.addclient WHERE Branch_id='".$branch_id."'");
+       $main_user_data = select_query("SELECT Userid AS user_id,UserName AS name FROM internalsoftware.addclient WHERE Branch_id='".$branch_id."'");
            
         $msg.=" <table><tr><td >Installer Name</td><td>
                 <select  name='Installer_name' id='Installer_name'>
@@ -629,7 +532,7 @@ if(isset($_GET['action']) && $_GET['action']=='DetailVehicle')
 {
     $user_Id=$_GET["user_Id"];
     $msg='<table>';
-	for($N=1;$N<=$_GET["RowId"];$N++)
+for($N=1;$N<=$_GET["RowId"];$N++)
     {
       $msg .=" <tr><td>";
      
@@ -683,29 +586,6 @@ $msg=' <select name="veh_reg" id="veh_reg" onchange="getdeviceImei(this.value,\'
   $msg .="</select>";
  
   echo $msg;
-}
-
-if(isset($_GET['action']) && $_GET['action']=='getvehdata')
-{
-	$data = $masterObj->getVehicleDetail($q);	
-	$ab = count($data);
-	
-	$msg= '<table border="0" style="width:50%;">
-			<tr><td>All</td>
-			<td><input type="checkbox" name="all_check" id="all_check" onchange="CheckUncheck('.$ab.');" style="width=20px;"/></td></tr><tr>';
-	
-	//while($row = mysql_fetch_array($data))
-	for($veh=0;$veh<count($data);$veh++)
-	{
-		if($veh%3==0) {
-			$msg .="</tr><tr>";
-		}
-		$msg .='<td>'.$data[$veh]['veh_reg'].'</td><td><input type="checkbox" name='.$veh.' id='.$veh.' value='.$data[$veh]['veh_reg'].' style="width=20px;"/></td>' ;
-	}
-	
-	$msg .="</tr></table>";
-	
-	echo $msg;
 }
 
 
@@ -795,7 +675,7 @@ if(isset($_GET['action']) && $_GET['action']=='forwardtoRepairComment')
      
     $Updateapprovestatus="update services set service_status='11', fwd_serv_to_repair='".date("Y-m-d H:i:s")." - ".$comment."' where id=".$row_id;
      
-     select_query($Updateapprovestatus);
+     mysql_query($Updateapprovestatus,$dblink2);
   
  }
  
@@ -804,7 +684,7 @@ if(isset($_GET['action']) && $_GET['action']=='forward_Repair_Install_Comment')
      
     $Updateapprovestatus="update installation set installation_status='11', fwd_install_to_repair='".date("Y-m-d H:i:s")." - ".$comment."' where id=".$row_id;
      
-     select_query($Updateapprovestatus);
+     mysql_query($Updateapprovestatus,$dblink2);
   
  }
 
@@ -856,7 +736,7 @@ if(isset($_GET['action']) && $_GET['action']=='Notwokingdate')
         
         echo date("d-M-Y H:i:s",strtotime($notworking[0]["notworkingDate"]));
     }
-
+  
 
 
     
@@ -898,37 +778,24 @@ if(isset($_GET['action']) && $_GET['action']=='Notwokingdate')
     height:400px;
     margin-left:19px;
 }
-.dataleft2 {
-	float:left;
-	width:400px;
-	/*height:200px;*/
-	margin-left:10px;
-	border-right:1px solid #bfc0c1;
-}
-.dataright2 {
-	float:right;
-	width:400px;
-	/*height:200px;*/
-	margin-left:19px;
-}
-.datacenter {
-	margin-top:350px;
-	width:800px;
-	/*height:200px;*/
-	margin-left:10px;
-}
 td {
-	padding-right:20px;
-	padding-left:20px;
+    padding-right:20px;
+    padding-left:20px;
 }
-.fix-height {
-	max-height: 400px;
-	overflow-y: scroll;
+
+.button {
+    background-color: #008CBA;
+    border: none;
+    color: white;
+    padding: 5px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
 }
-.fix-height2 {
-	max-height: 400px;
-	overflow-y: scroll;
-}
+.button4 {background-color: #e7e7e7; color: black;}
 </style>
 <?
         
@@ -937,359 +804,287 @@ td {
           
     
 
+
 if($tablename=="installation")
-        {
-   //echo 'tt'; die;
-        $query = "select * from  installation left join re_city_spr_1 on installation.Zone_area =re_city_spr_1.id where installation.id=".$RowId;
-       // echo $query; die;
+{
+      //echo 'tt'; die;
+      $query = "select * from  installation left join re_city_spr_1 on installation.Zone_area =re_city_spr_1.id where installation.id=".$RowId;
+     // echo $query; die;
 
-      $row=select_query($query);
-     // echo '<pre>'; print_r($row);die;
-      
-      if($row[0]['fwd_tech_rm_id'] != "" && $row[0]['fwd_repair_id'] == ""){
-          $support_query = select_query("select user_name from request_forward_list where user_id='".$row[0]['fwd_tech_rm_id']."'");
-          $forward_name = $support_query[0]['user_name'];
-      } else if($row[0]['fwd_repair_id'] != "") {
-          $support_query = select_query("select user_name from request_forward_list where user_id='".$row[0]['fwd_repair_id']."'");
-          $forward_name = $support_query[0]['user_name'];
-      } else { $forward_name = '';}
-
-       $toolk=explode('#',$row[0]['accessories_tollkit']);
-       $tools=array();
-       $accessory_data=array();
-      // echo '<pre>'; print_r($toolk);die;
-      ?>
-  <div id="databox">
-    <div class="heading">Installation</div>
-    <div class="dataleft">
-      <table cellspacing="2" cellpadding="2">
-        <tbody>
-          <tr>
-            <td> Date: </td>
-            <td><?echo $row[0]["req_date"];?></td>
-          </tr>
-          <tr>
-            <td>Request By: </td>
-            <td><?echo $row[0]["request_by"];?></td>
-          </tr>
-          <?
-  $sales=mysql_fetch_array(mysql_query("select name from sales_person where id='".$row[0]['sales_person']."'"));
-  ?>
-          <tr>
-            <td>Sales Person </td>
-            <td><?echo $sales['name'];?></td>
-          </tr>
-          <? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["user_id"];
-      $rowuser=select_query($sql);
-      ?>
-          <tr>
-            <td>Client User Name </td>
-            <td><?echo $rowuser[0]["sys_username"];?></td>
-          </tr>
-          <tr>
-            <td>Company Name </td>
-            <td><?echo $row[0]["company_name"];?></td>
-          </tr>
-          <tr>
-            <td>No. Of Vehicles: </td>
-            <td><?echo $row[0]["no_of_vehicals"];?></td>
-          </tr>
-          <tr>
-            <td>Approve Installation: </td>
-            <td><?echo $row[0]["installation_approve"];?></td>
-          </tr>
-          <tr>
-            <td>Area: </td>
-            <td><?echo $row[0]["name"];?></td>
-          </tr>
-          
-          <?php if($row[0]['location']!=""){?>
-          <tr>
-            <td>Location: </td>
-            <td><?echo $row[0]["location"];?></td>
-          </tr>
-          <?php }else{ $city= select_query("select * FROM $internalsoftware.tbl_city_name where branch_id='".$row[0]['inter_branch']."'");?>
-          <tr>
-            <td>Location: </td>
-            <td><?echo $city[0]["city"];?></td>
-          </tr>
-          <?php }?>
-          <tr>
-          <!-- <tr>
-            <td>Model:</td>
-            <td><?echo $row[0]["model"];?></td>
-          </tr> -->
-           <tr>
-          <?php 
-          //$sqlDevice=select_query("SELECT device_type FROM device_type where id='".$row[0]["device_type"]."' ");   
-           $sqlDevice=select_query("SELECT item_name FROM item_master where item_id='".$row[0]["model_parent"]."'");
-           ?>
-            <td>Device Type:</td>
-            <td><?echo $sqlDevice[0]["item_name"];?></td>
-          </tr>
-          <tr>
-          <?php 
-          //$sqlModel=select_query("SELECT device_model FROM device_model where id='".$row[0]["model"]."' ");   
-            $sqlModel=select_query("SELECT item_name FROM item_master where item_id='".$row[0]["model"]."'");
-           ?>
-            <td>Model:</td>
-            <td><?echo $sqlModel[0]["item_name"];?></td>
-          </tr>
-
-          <tr>
-            <td>Available Time Status: </td>
-            <td><?echo $row[0]["atime_status"];?></td>
-          </tr>
-          <tr>
-            <td>Time: </td>
-            <td><?echo $row[0]["time"];?></td>
-          </tr>
-          <tr>
-            <td>To Time: </td>
-            <td><?echo $row[0]["totime"];?></td>
-          </tr>
-        
-         <tr>
-            <td>Vehicle Type: </td>
-            <td><?echo $row[0]["veh_type"];?></td>
-          </tr>
-          <tr>
-            <td><?php if($row[0]["TrailerType"]){ ?> Trailer Type <?php } ?></td>
-            <td><?echo $row[0]["TrailerType"];?></td>
-          </tr>
-          <tr>
-            <td><?php if($row[0]["MachineType"]){ ?> Trailer Type <?php } ?></td>
-            <td><?echo $row[0]["MachineType"];?></td>
-          </tr>
-          <tr>
-            <td><?php if($row[0]["actype"]){ ?> Trailer Type <?php } ?></td>
-            <td><?echo $row[0]["actype"];?></td>
-          </tr>
-          <tr>
-            <td><?php if($row[0]["standard"]){ ?> Trailer Type <?php } ?></td>
-            <td><?echo $row[0]["standard"];?></td>
-          </tr>
-          <tr>
-            <td><?php if($row[0]["TruckType"]){ ?> Trailer Type <?php } ?></td>
-            <td><?echo $row[0]["TruckType"];?></td>
-          </tr>
-           <tr>
-            <td>Billing</td>
-            <td><?echo $row[0]["billing"];?></td>
-          </tr>
-      
-         
-        </tbody>
-      </table>
-    </div>
-    <div class="dataright">
-      <table cellspacing="2" cellpadding="2">
-        <tbody>
-          <tr>
-            <td>Job: </td>
-            <td><?echo $row[0]["instal_reinstall"];?></td>
-          </tr>
-          <?php  for($v=0;$v<count($toolk);$v++)
-          {
-          //$tools[]=$toolk[$v]; 
-           // echo "SELECT items AS `access_name` FROM toolkit_access where id='".$toolk[$v]."' ORDER BY `access_name` asc"; die;
-           $accessory_data=select_query("SELECT items AS `access_name` FROM toolkit_access where id='".$toolk[$v]."' ORDER BY `access_name` asc");
-           if($accessory_data!="")
-           {?>
-            <tr>
-              <td><?php echo $accessory_data[0]['access_name'];?> </td>
-             <td>Yes</td>
-            <tr>
-           <?php }
-           
-         }
-      // echo $accessories_tollkits; die;
-       ?>
-       <tr>
-            <td>Contact No.:</td>
-            <td><?echo $row[0]["contact_number"];?></td>
-          </tr>
-          <tr>
-            <td>Contact Person: </td>
-            <td><?echo $row[0]["contact_person"];?></td>
-          </tr>
-            <tr>
-            <td>Alternate Contact No.:</td>
-            <td><?echo $row[0]["alt_cont_number"];?></td>
-          </tr>
-          <tr>
-            <td>Alternate Contact Person: </td>
-            <td><?echo $row[0]["alt_cont_person"];?></td>
-          </tr>
-
-          <tr>
-            <td>Installation Made: </td>
-            <td><?echo $row[0]["installation_made"];?></td>
-          </tr>
-          <tr>
-            <td>Installer Name: </td>
-            <td><?echo $row[0]["inst_name"];?></td>
-          </tr>
-          <tr>
-            <td>Installer Current Location: </td>
-            <td><?echo $row[0]["inst_cur_location"];?></td>
-          </tr>
-          <tr>
-            <td>Installation Done At: </td>
-            <td><?echo $row[0]["rtime"];?></td>
-          </tr>
-          <tr>
-            <td>Reason To Back Services:</td>
-            <td><?echo $row[0]["back_reason"];?></td>
-          </tr>
-          <tr>
-            <td>Forward to <strong>
-              <?=$forward_name;?>
-              </strong> :</td>
-            <td><? if($row[0]['fwd_reason'] != "" && $row[0]['fwd_tech_rm_id'] != "" && $row[0]['fwd_repair_id'] == "") {
-              echo $row[0]['fwd_datetime'].' - '.$row[0]['fwd_reason'];
-          } else if($row[0]['fwd_install_to_repair'] != "" && $row[0]['fwd_repair_id'] == "") {
-              echo $row[0]['fwd_install_to_repair']; 
-          } else if($row[0]['fwd_install_to_repair'] != "" && $row[0]['fwd_repair_id'] != "") {
-              echo $row[0]['fwd_repair_date'].' - '.$row[0]['fwd_install_to_repair']; 
-          }
-      ?></td>
-          </tr>
-          <tr>
-            <td>Reply Comment:</td>
-            <td><? if(($row[0]['fwd_tech_rm_id'] != "" || $row[0]['fwd_repair_id'] == "") && $row[0]["fwd_repair_to_install"] != ""){
-               echo $row[0]['fwd_done_time'].' - '.$row[0]["fwd_repair_to_install"];
-          } else {
-              echo $row[0]["fwd_repair_to_install"];
-          }
-       ?></td>
-          </tr>
-          <tr>
-            <td><strong>Process Pending </strong></td>
-            <td><strong>
-              <?  if($row[0]["installation_status"]==7 && ($row[0]["admin_comment"]!="" || $row[0]["sales_comment"]=="")){echo "Reply Pending at Request Side";}
-      elseif($row[0]["installation_status"]==7 && $row[0]["admin_comment"]=="" ){echo "Pending Saleslogin for Information";}
-      elseif($row[0]["approve_status"]==0 && $row[0]["installation_status"]==8 ){echo "Pending Admin Approval";}
-      elseif($row[0]["installation_status"]==9 && $row[0]["approve_status"]==1 ){echo "Pending Confirmation at Request Person";}
-      elseif($row[0]["installation_status"]==1 ){echo "Pending Dispatch Team";}
-      elseif($row[0]["installation_status"]==2 ){echo "Assign To Installer";}
-      elseif($row[0]["installation_status"]==11 ){echo "Request Forward to ".$forward_name;}
-      elseif($row[0]["installation_status"]==3 ){echo "Back Installation";}
-      elseif($row[0]["installation_status"]==15 ){echo "Pending Remaining Installation";}
-      elseif($row[0]["installation_status"]==5 || $row[0]["installation_status"]==6){echo "Installation Close";}?>
-              </strong></td>
-          </tr>
-          <?php if($_SESSION['BranchId']==1){?>
-          <tr>
-            <td>Sales Comment</td>
-            <td><?echo $row[0]["sales_comment"];?></td>
-          </tr>
-          <tr>
-            <td>Admin Comment</td>
-            <td><?echo $row[0]["admin_comment"];?></td>
-          </tr>
-          <tr>
-            <td>Admin Approval</td>
-            <td><?if($row[0]["approve_status"]==1) echo "Approved";?></td>
-          </tr>
-          <tr>
-            <td>Approval Date</td>
-            <td><?
-      if($row[0]["approve_status"]==1 && $row[0]["approve_date"]!='')
-      {
-          echo date("d-M-Y h:i:s A",strtotime($row[0]["approve_date"]));
-      }
-      else
-      {
-          echo "";
-      }
+    $row=select_query($query);
+   // echo '<pre>'; print_r($row);die;
     
-      ?></td>
-          </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </div>
+    if($row[0]['fwd_tech_rm_id'] != "" && $row[0]['fwd_repair_id'] == ""){
+        $support_query = select_query("select user_name from request_forward_list where user_id='".$row[0]['fwd_tech_rm_id']."'");
+        $forward_name = $support_query[0]['user_name'];
+    } else if($row[0]['fwd_repair_id'] != "") {
+        $support_query = select_query("select user_name from request_forward_list where user_id='".$row[0]['fwd_repair_id']."'");
+        $forward_name = $support_query[0]['user_name'];
+    } else { $forward_name = '';}
 
-   <div>&#160;</div>
-   <div>&#160;</div>
-    <?php
-    $query23 = "select * from  installation_request left join re_city_spr_1 on installation.Zone_area =re_city_spr_1.id where installation.id=".$RowId;
-       // echo $query; die;
-
-      $row23=select_query($query23);
-
-      //print_r($row23);die;
-
-    if($row23[0]["instal_reinstall"] == 'online_crack'){
-   ?>   
-   <div>
-     <table border="2" width="100%">
-       
-        <thead>
-          <tr>
-            <td width="20%"><b>Veh Reg No.:</b></td>
-             <td width="80%">
-              <?php
-
-                $veh_reg = $row23[0]["veh_reg"];
-                //$newveh_reg = wordwrap($veh_reg, 21, "\n", true);
-
-                echo "$veh_reg\n";
-
-              ?>
-            </td>
-          </tr>
-          <tr>
-            <td width="20%"><b>Veh Device IMEI:</b></td>
-             <td width="80%">
-              <?php
-
-                $deviceIMEI = $row23[0]["device_imei"];
-                //$newdeviceIMEI = wordwrap($deviceIMEI, 21, "\n", true);
-
-                echo "$deviceIMEI\n";
-
-              ?>
-            </td>
-          </tr>
-        </thead>
-     </table>
-   </div>
-   <?php } ?>
- <?php 
-  if($row23[0]["instal_reinstall"] == 're_install'){
- ?>   
- <div>
-   <table border="2" width="100%">
-     
-      <thead>
-        
-         <tr>
-          <td>Device IMEI:</td>
-           <td>
-            <?php
-
-              $deviceIMEI = $row23[0]["device_imei"];
-              $newdeviceIMEI = wordwrap($deviceIMEI, 21, "\n", true);
-
-              echo "$newdeviceIMEI\n";
-
-            ?>
-          </td>
+     $toolk=explode('#',$row[0]['accessories_tollkit']);
+     $tools=array();
+     $accessory_data=array();
+    // echo '<pre>'; print_r($toolk);die;
+    ?>
+<div id="databox">
+  <div class="heading">Installation</div>
+  <div class="dataleft">
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td> Date: </td>
+          <td><?echo $row[0]["req_date"];?></td>
         </tr>
-      </thead>
-   </table>
- </div>
- <?php } ?>
+        <tr>
+          <td>Request By: </td>
+          <td><?echo $row[0]["request_by"];?></td>
+        </tr>
+        <?
+$sales=mysql_fetch_array(mysql_query("select name from sales_person where id='".$row[0]['sales_person']."'"));
+?>
+        <tr>
+          <td>Sales Person </td>
+          <td><?echo $sales['name'];?></td>
+        </tr>
+        <? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["user_id"];
+    $rowuser=select_query($sql);
+    ?>
+        <tr>
+          <td>Client User Name </td>
+          <td><?echo $rowuser[0]["sys_username"];?></td>
+        </tr>
+        <tr>
+          <td>Company Name </td>
+          <td><?echo $row[0]["company_name"];?></td>
+        </tr>
+        <tr>
+          <td>No. Of Vehicles: </td>
+          <td><?echo $row[0]["no_of_vehicals"];?></td>
+        </tr>
+        <tr>
+          <td>Approve Installation: </td>
+          <td><?echo $row[0]["installation_approve"];?></td>
+        </tr>
+        <tr>
+          <td>Area: </td>
+          <td><?echo $row[0]["name"];?></td>
+        </tr>
+        
+        <?php if($row[0]['location']!=""){?>
+        <tr>
+          <td>Location: </td>
+          <td><?echo $row[0]["location"];?></td>
+        </tr>
+        <?php }else{ $city= select_query("select * FROM internalsoftware.tbl_city_name where branch_id='".$row[0]['inter_branch']."'");?>
+        <tr>
+          <td>Location: </td>
+          <td><?echo $city[0]["city"];?></td>
+        </tr>
+        <?php }?>
+        <tr>
+        <!-- <tr>
+          <td>Model:</td>
+          <td><?echo $row[0]["model"];?></td>
+        </tr> -->
+         <tr>
+        <?php 
+        //$sqlDevice=select_query("SELECT device_type FROM device_type where id='".$row[0]["device_type"]."' ");   
+         $sqlDevice=select_query("SELECT item_name FROM item_master where item_id='".$row[0]["device_type"]."'");
+         ?>
+          <td>Device Type:</td>
+          <td><?echo $sqlDevice[0]["item_name"];?></td>
+        </tr>
+        <tr>
+        <?php 
+        //$sqlModel=select_query("SELECT device_model FROM device_model where id='".$row[0]["model"]."' ");   
+         $sqlModel=select_query("select im.* from installation_request ir left join item_master im on ir.model=im.item_id where ir.model='".$row[0]["model"]."'");
+         ?>
+          <td>Model:</td>
+          <td><?echo $sqlModel[0]["item_name"];?></td>
+        </tr>
+
+        <tr>
+          <td>Available Time Status: </td>
+          <td><?echo $row[0]["atime_status"];?></td>
+        </tr>
+        <tr>
+          <td>Time: </td>
+          <td><?echo $row[0]["time"];?></td>
+        </tr>
+        <tr>
+          <td>To Time: </td>
+          <td><?echo $row[0]["totime"];?></td>
+        </tr>
+        
+       <tr>
+          <td>Vehicle Type: </td>
+          <td><?echo $row[0]["veh_type"];?></td>
+        </tr>
+        <tr>
+          <td>Trailer Type </td>
+          <td><?echo $row[0]["TrailerType"];?></td>
+        </tr>
+        <tr>
+          <td>Machine Type</td>
+          <td><?echo $row[0]["MachineType"];?></td>
+        </tr>
+        <tr>
+          <td>AC/Non AC </td>
+          <td><?echo $row[0]["actype"];?></td>
+        </tr>
+        <tr>
+          <td>Delux/Non Delux</td>
+          <td><?echo $row[0]["standard"];?></td>
+        </tr>
+        <tr>
+          <td>Truck Type</td>
+          <td><?echo $row[0]["TruckType"];?></td>
+        </tr>
+         <tr>
+          <td>Billing</td>
+          <td><?echo $row[0]["billing"];?></td>
+        </tr>
+      
+       
+      </tbody>
+    </table>
+  </div>
+  <div class="dataright">
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td>Job: </td>
+          <td><?echo $row[0]["instal_reinstall"];?></td>
+        </tr>
+        <?php  for($v=0;$v<count($toolk);$v++)
+        {
+        //$tools[]=$toolk[$v]; 
+         // echo "SELECT items AS `access_name` FROM toolkit_access where id='".$toolk[$v]."' ORDER BY `access_name` asc"; die;
+         $accessory_data=select_query("SELECT items AS `access_name` FROM toolkit_access where id='".$toolk[$v]."' ORDER BY `access_name` asc");
+         if($accessory_data!="")
+         {?>
+          <tr>
+            <td><?php echo $accessory_data[0]['access_name'];?> </td>
+           <td>Yes</td>
+          <tr>
+         <?php }
+         
+       }
+    // echo $accessories_tollkits; die;
+     ?>
+     <tr>
+          <td>Contact No.:</td>
+          <td><?echo $row[0]["contact_number"];?></td>
+        </tr>
+        <tr>
+          <td>Contact Person: </td>
+          <td><?echo $row[0]["contact_person"];?></td>
+        </tr>
+          <tr>
+          <td>Alternate Contact No.:</td>
+          <td><?echo $row[0]["alt_cont_number"];?></td>
+        </tr>
+        <tr>
+          <td>Alternate Contact Person: </td>
+          <td><?echo $row[0]["alt_cont_person"];?></td>
+        </tr>
+
+        <tr>
+          <td>Installation Made: </td>
+          <td><?echo $row[0]["installation_made"];?></td>
+        </tr>
+        <tr>
+          <td>Installer Name: </td>
+          <td><?echo $row[0]["inst_name"];?></td>
+        </tr>
+        <tr>
+          <td>Installer Current Location: </td>
+          <td><?echo $row[0]["inst_cur_location"];?></td>
+        </tr>
+        <tr>
+          <td>Installation Done At: </td>
+          <td><?echo $row[0]["rtime"];?></td>
+        </tr>
+        <tr>
+          <td>Reason To Back Services:</td>
+          <td><?echo $row[0]["back_reason"];?></td>
+        </tr>
+        <tr>
+          <td>Forward to <strong>
+            <?=$forward_name;?>
+            </strong> :</td>
+          <td><? if($row[0]['fwd_reason'] != "" && $row[0]['fwd_tech_rm_id'] != "" && $row[0]['fwd_repair_id'] == "") {
+            echo $row[0]['fwd_datetime'].' - '.$row[0]['fwd_reason'];
+        } else if($row[0]['fwd_install_to_repair'] != "" && $row[0]['fwd_repair_id'] == "") {
+            echo $row[0]['fwd_install_to_repair']; 
+        } else if($row[0]['fwd_install_to_repair'] != "" && $row[0]['fwd_repair_id'] != "") {
+            echo $row[0]['fwd_repair_date'].' - '.$row[0]['fwd_install_to_repair']; 
+        }
+    ?></td>
+        </tr>
+        <tr>
+          <td>Reply Comment:</td>
+          <td><? if(($row[0]['fwd_tech_rm_id'] != "" || $row[0]['fwd_repair_id'] == "") && $row[0]["fwd_repair_to_install"] != ""){
+             echo $row[0]['fwd_done_time'].' - '.$row[0]["fwd_repair_to_install"];
+        } else {
+            echo $row[0]["fwd_repair_to_install"];
+        }
+     ?></td>
+        </tr>
+        <tr>
+          <td><strong>Process Pending </strong></td>
+          <td><strong>
+            <?  if($row[0]["installation_status"]==7 && ($row[0]["admin_comment"]!="" || $row[0]["sales_comment"]=="")){echo "Reply Pending at Request Side";}
+    elseif($row[0]["installation_status"]==7 && $row[0]["admin_comment"]=="" ){echo "Pending Saleslogin for Information";}
+    elseif($row[0]["approve_status"]==0 && $row[0]["installation_status"]==8 ){echo "Pending Admin Approval";}
+    elseif($row[0]["installation_status"]==9 && $row[0]["approve_status"]==1 ){echo "Pending Confirmation at Request Person";}
+    elseif($row[0]["installation_status"]==1 ){echo "Pending Dispatch Team";}
+    elseif($row[0]["installation_status"]==2 ){echo "Assign To Installer";}
+    elseif($row[0]["installation_status"]==11 ){echo "Request Forward to ".$forward_name;}
+    elseif($row[0]["installation_status"]==3 ){echo "Back Installation";}
+    elseif($row[0]["installation_status"]==15 ){echo "Pending Remaining Installation";}
+    elseif($row[0]["installation_status"]==5 || $row[0]["installation_status"]==6){echo "Installation Close";}?>
+            </strong></td>
+        </tr>
+        <?php if($_SESSION['BranchId']==1){?>
+        <tr>
+          <td>Sales Comment</td>
+          <td><?echo $row[0]["sales_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Admin Comment</td>
+          <td><?echo $row[0]["admin_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Admin Approval</td>
+          <td><?if($row[0]["approve_status"]==1) echo "Approved";?></td>
+        </tr>
+        <tr>
+          <td>Approval Date</td>
+          <td><?
+    if($row[0]["approve_status"]==1 && $row[0]["approve_date"]!='')
+    {
+        echo date("d-M-Y h:i:s A",strtotime($row[0]["approve_date"]));
+    }
+    else
+    {
+        echo "";
+    }
+  
+    ?></td>
+        </tr>
+        <?php } ?>
+      </tbody>
+    </table>
+  </div>
 </div>
 <? }
 
-
-elseif($tablename=="installation_request")
+elseIf($tablename=="installation_request")
         {
    
-   $query = "select * FROM $internalsoftware.installation_request left join $internalsoftware.re_city_spr_1 on installation_request.Zone_area =re_city_spr_1.id where installation_request.id=".$RowId;
+    $query = "select * FROM internalsoftware.installation_request left join internalsoftware.re_city_spr_1 on installation_request.Zone_area =re_city_spr_1.id where installation_request.id=".$RowId;
     $row=select_query($query);
   //echo '<pre>'; print_r($row);die;
     //echo $row[0]['accessories_tollkit']; die;
@@ -1312,13 +1107,13 @@ elseif($tablename=="installation_request")
           <td><?echo $row[0]["request_by"];?></td>
         </tr>
         <? 
-    $sales=select_query("select name FROM $internalsoftware.sales_person where id='".$row[0]['sales_person']."' ");
+    $sales=select_query("select name FROM internalsoftware.sales_person where id='".$row[0]['sales_person']."' ");
     ?>
         <tr>
           <td>Sales Person </td>
           <td><?echo $sales[0]['name'];?></td>
         </tr>
-        <? $sql="SELECT Userid AS id,UserName AS sys_username FROM $internalsoftware.addclient  WHERE Userid=".$row[0]["user_id"];
+        <? $sql="SELECT Userid AS id,UserName AS sys_username FROM internalsoftware.addclient  WHERE Userid=".$row[0]["user_id"];
     $rowuser=select_query($sql);
     ?>
         <tr>
@@ -1346,59 +1141,28 @@ elseif($tablename=="installation_request")
           <td>Location: </td>
           <td><?echo $row[0]["location"];?></td>
         </tr>
-        <?php }else{ $city= select_query("select * FROM $internalsoftware.tbl_city_name where branch_id='".$row[0]['inter_branch']."'");?>
+        <?php }else{ $city= select_query("select * FROM internalsoftware.tbl_city_name where branch_id='".$row[0]['inter_branch']."'");?>
         <tr>
           <td>Location: </td>
           <td><?echo $city[0]["city"];?></td>
         </tr>
         <?php }?>
         <tr>
-        <!-- <?php 
-          $sqlDevice=select_query("SELECT item_name FROM $internalsoftware.item_master where item_id='".$row[0]["model_parent"]."'");
+        <?php 
+        //$sqlDevice=select_query("SELECT device_type FROM device_type where id='".$row[0]["device_type"]."' ");
+        
+        $sqlDevice=select_query("SELECT item_name FROM item_master where item_id='".$row[0]["device_type"]."'");
            ?>
           <td>Device Type:</td>
           <td><?echo $sqlDevice[0]["item_name"];?></td>
         </tr>
         <tr>
         <?php 
-          $sqlModel=select_query("select im.* from $internalsoftware.installation_request ir left join item_master im on ir.model=im.item_id where ir.model='".$row[0]["model"]."'");
+        //$sqlModel=select_query("SELECT device_model FROM device_model where id='".$row[0]["model"]."' ");  
+         $sqlModel=select_query("select im.* from installation_request ir left join item_master im on ir.model=im.item_id where ir.model='".$row[0]["model"]."'");
           ?>
           <td>Model:</td>
           <td><?echo $sqlModel[0]["item_name"];?></td>
-        </tr> -->
-         <?php
-          //echo "select * FROM internalsoftware.admin_stock_approved_history where internalsoftware.installation_req_id=".$RowId;die;
-          $adminApproved = select_query("select * FROM $internalsoftware.admin_stock_approved_history where installation_req_id=".$RowId);
-          if($adminApproved[0]['device_type_id'] != $adminApproved[0]['previousModel']){
-        ?>
-        <tr>
-          <td>Installation Req Model:</td>
-          <td>
-            <?php
-              $sqlModel=select_query("SELECT item_name FROM $internalsoftware.item_master where item_id='".$adminApproved[0]['previousModel']."'");
-
-              echo $sqlModel[0]['item_name']."</br>";
-            ?>
-          </td>
-        </tr>
-        <?php } 
-
-
-        ?>
-
-
-        <tr>
-        <?php
-        //$sqlDevice=select_query("SELECT device_type FROM device_type where id='".$row[0]["device_type"]."' ");
-         $sqlDevice=select_query("SELECT item_name FROM item_master where item_id='".$row[0]["model_parent"]."'");
-         $sqlModel=select_query("SELECT item_name FROM item_master where item_id='".$row[0]["model"]."'"); 
-          ?>
-          <td>Device Type:</td>
-          <td><?echo $sqlDevice[0]["item_name"]?></td>
-        </tr>
-        <tr>
-           <td>Device Model:</td>
-           <td><?echo $sqlModel[0]["item_name"]?></td>
         </tr>
         <tr>
           <td>Available Time Status: </td>
@@ -1412,29 +1176,44 @@ elseif($tablename=="installation_request")
           <td>To Time: </td>
           <td><?echo $row[0]["totime"];?></td>
         </tr>
-       
+        <tr>
+          <td>Contact No.:</td>
+          <td><?echo $row[0]["contact_number"];?></td>
+        </tr>
+        <tr>
+          <td>Contact Person: </td>
+          <td><?echo $row[0]["contact_person"];?></td>
+        </tr>
+        <tr>
+          <td>Alternative Contact No.</td>
+          <td><?echo $row[0]["alter_contact_no"];?></td>
+        </tr>
+        <tr>
+          <td>Designation</td>
+          <td><?echo $row[0]["designation"];?></td>
+        </tr>
           <tr>
           <td>Vehicle Type: </td>
           <td><?echo $row[0]["veh_type"];?></td>
         </tr>
         <tr>
-          <td><?php if($row[0]["TrailerType"]) {?>Trailer Type <?php } ?></td>
+          <td>Trailer Type </td>
           <td><?echo $row[0]["TrailerType"];?></td>
         </tr>
         <tr>
-          <td><?php if($row[0]["MachineType"]) {?>Machine Type<?php } ?></td>
+          <td>Machine Type</td>
           <td><?echo $row[0]["MachineType"];?></td>
         </tr>
         <tr>
-          <td><?php if($row[0]["actype"]) {?>AC/Non AC <?php } ?></td>
+          <td>AC/Non AC </td>
           <td><?echo $row[0]["actype"];?></td>
         </tr>
         <tr>
-          <td><?php if($row[0]["standard"]) {?>Delux/Non Delux<?php } ?></td>
+          <td>Delux/Non Delux</td>
           <td><?echo $row[0]["standard"];?></td>
         </tr>
         <tr>
-          <td><?php if($row[0]["TruckType"]) {?>Truck Type<?php } ?></td>
+          <td>Truck Type</td>
           <td><?echo $row[0]["TruckType"];?></td>
         </tr>
          <tr>
@@ -1446,18 +1225,14 @@ elseif($tablename=="installation_request")
   <div class="dataright">
     <table cellspacing="2" cellpadding="2">
       <tbody>
-       <tr>
+        <tr>
           <td>Job: </td>
-          <td>
-          <? 
-          if($row[0]["instal_reinstall"] == 're_install'){ echo "Re-Addition";}
-          else { echo $row[0]["instal_reinstall"]; }
-          ?></td>
+          <td><?echo $row[0]["instal_reinstall"];?></td>
         </tr>
      <?php  for($v=0;$v<count($toolk);$v++)
       {
         //$tools[]=$toolk[$v]; 
-         $accessory_data=select_query("SELECT items AS `access_name` FROM $internalsoftware.toolkit_access where id='".$toolk[$v]."' ORDER BY `access_name` asc");
+         $accessory_data=select_query("SELECT items AS `access_name` FROM toolkit_access where id='".$toolk[$v]."' ORDER BY `access_name` asc");
          if($accessory_data!="")
          {?>
           <tr>
@@ -1562,81 +1337,9 @@ elseif($tablename=="installation_request")
       </tbody>
     </table>
   </div>
-<br><br><br><br><br><br>
-  <div>&#160;</div>
- <div>&#160;</div>
-  <?php
-  //$query23 = "select * from  installation_request left join re_city_spr_1 on installation.Zone_area =re_city_spr_1.id where installation.id=".$RowId;
-     // echo $query; die;
-
-    //$row23=select_query($query23);
-
-    //print_r($row23);die;
-
-  if($row[0]["instal_reinstall"] == 'online_crack'){
- ?>   
- <div>
-   <table border="2" width="100%">
-     
-      <thead>
-        <tr>
-          <td width="20%"><b>Veh Reg No.:</b></td>
-           <td width="80%">
-            <?php
-
-              $veh_reg = $row[0]["veh_reg"];
-              //$newveh_reg = wordwrap($veh_reg, 21, "\n", true);
-
-              echo "$veh_reg\n";
-
-            ?>
-          </td>
-        </tr>
-        <tr>
-          <td width="20%"><b>Veh Device IMEI:</b></td>
-           <td width="80%">
-            <?php
-
-              $deviceIMEI = $row[0]["device_imei"];
-              //$newdeviceIMEI = wordwrap($deviceIMEI, 21, "\n", true);
-
-              echo "$deviceIMEI\n";
-
-            ?>
-          </td>
-        </tr>
-      </thead>
-   </table>
- </div>
- <?php } ?>
- <?php 
-  if($row[0]["instal_reinstall"] == 're_install'){
- ?>   
- <div>
-   <table border="2" width="100%">
-     
-      <thead>
-        
-         <tr>
-          <td width="20%">Device IMEI:</td>
-           <td width="80%">
-            <?php
-
-              $deviceIMEI = $row[0]["device_imei"];
-              $newdeviceIMEI = wordwrap($deviceIMEI, 21, "\n", true);
-
-              echo "$newdeviceIMEI\n";
-
-            ?>
-          </td>
-        </tr>
-      </thead>
-   </table>
- </div>
- <?php } ?>
 </div>
 <? }
-elseif($tablename=="installation_history_tbl")
+else If($tablename=="installation_history_tbl")
         {
   
     $query = "select * from  installation_history_tbl left join re_city_spr_1 on installation_history_tbl.Zone_area =re_city_spr_1.id where installation_history_tbl.id=".$RowId;
@@ -1814,7 +1517,7 @@ $sales=mysql_fetch_array(mysql_query("select name from sales_person where id='".
           <td>Installer Current Location: </td>
           <td><?echo $row[0]["inst_cur_location"];?></td>
         </tr>
-        <!--<tr><td>Change Installer Name: </td><td><?echo $row[0]["inst_cur_location"];?></td></tr> 
+        <!--<tr><td>Change Installer Name: </td><td><?echo $row[0]["inst_cur_location"];?></td></tr>
 -->
         <tr>
           <td>Installation Done At: </td>
@@ -1881,17 +1584,16 @@ $sales=mysql_fetch_array(mysql_query("select name from sales_person where id='".
 </div>
 <? }
 
-    elseif($tablename=="services")
+    else If($tablename=="services")
         {
-          //echo 'tt'; die;
-          $query = "SELECT * FROM $internalsoftware.services left join re_city_spr_1 on services.Zone_area =re_city_spr_1.id  where services.id=".$RowId;
+          $query = "SELECT * FROM services left join re_city_spr_1 on services.Zone_area =re_city_spr_1.id  where services.id=".$RowId;
             $row=select_query($query);
-            //echo '<pre>'; print_r($row); die;
+            
             if($row[0]['fwd_tech_rm_id'] != "" && $row[0]['fwd_repair_id'] == ""){
-                $support_query = select_query("select user_name from $internalsoftware.request_forward_list where user_id='".$row[0]['fwd_tech_rm_id']."'");
+                $support_query = select_query("select user_name from request_forward_list where user_id='".$row[0]['fwd_tech_rm_id']."'");
                 $forward_name = $support_query[0]['user_name'];
             } else if($row[0]['fwd_repair_id'] != "") {
-                $support_query = select_query("select user_name from $internalsoftware.request_forward_list where user_id='".$row[0]['fwd_repair_id']."'");
+                $support_query = select_query("select user_name from request_forward_list where user_id='".$row[0]['fwd_repair_id']."'");
                 $forward_name = $support_query[0]['user_name'];
             } else { $forward_name = '';}
             
@@ -1909,7 +1611,7 @@ $sales=mysql_fetch_array(mysql_query("select name from sales_person where id='".
           <td>Request By </td>
           <td><?echo $row[0]["request_by"];?></td>
         </tr>
-        <? $sql="SELECT Userid AS id,UserName AS sys_username FROM $internalsoftware.addclient  WHERE Userid=".$row[0]["user_id"];
+        <? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["user_id"];
     $rowuser=select_query($sql);
     ?>
         <tr>
@@ -1924,15 +1626,32 @@ $sales=mysql_fetch_array(mysql_query("select name from sales_person where id='".
           <td>Registration No </td>
           <td><?echo $row[0]["veh_reg"];?></td>
         </tr>
-
+        <tr>
+       <!--    <td>Device Type: </td>
+          <td><?echo $row[0]["device_model"];?></td>
+        </tr>
         <tr>
           <td>Device Model: </td>
           <td><?echo $row[0]["device_model"];?></td>
-        </tr>
+        </tr> -->
           <tr>
-          <td>Device Type: </td>
-          <td><?echo $row[0]["device_type"];?></td>
+        <?php 
+        //$sqlDevice=select_query("SELECT device_type FROM device_type where id='".$row[0]["device_type"]."' ");  
+         $sqlDevice=select_query("SELECT item_name FROM item_master where item_id='".$row[0]["device_type"]."'");
+          ?>
+          <td>Device Type:</td>
+          <td><?echo $sqlDevice[0]["item_name"];?></td>
         </tr>
+        <tr>
+        <?php
+        // $sqlModel=select_query("SELECT device_model FROM device_model where id='".$row[0]["model"]."' ");   
+        $sqlModel=select_query("select im.* from installation_request ir left join item_master im on ir.model=im.item_id where ir.model='".$row[0]["device_model"]."'");
+        ?>
+          <td>Model:</td>
+          <td><?echo $sqlModel[0]["item_name"];?></td>
+        </tr>
+
+
         <tr>
           <td>Device IMEI: </td>
           <td><?echo $row[0]["device_imei"];?></td>
@@ -1954,7 +1673,7 @@ $sales=mysql_fetch_array(mysql_query("select name from sales_person where id='".
           <td>Location: </td>
           <td><?echo $row[0]["location"];?></td>
         </tr>
-        <?php }else{ $city= mysql_fetch_array(mysql_query("select * from $internalsoftware.tbl_city_name where branch_id='".$row[0]['inter_branch']."'",$dblink2));?>
+        <?php }else{ $city= mysql_fetch_array(mysql_query("select * from tbl_city_name where branch_id='".$row[0]['inter_branch']."'",$dblink2));?>
         <tr>
           <td>Location: </td>
           <td><?echo $city["city"];?></td>
@@ -2014,7 +1733,7 @@ $sales=mysql_fetch_array(mysql_query("select name from sales_person where id='".
           <td>Installer Current Location: </td>
           <td><?echo $row[0]["inst_cur_location"];?></td>
         </tr>
-        <!--<tr><td>Change Installer Name: </td><td><?echo $row[0]["inst_cur_location"];?></td></tr> 
+        <!--<tr><td>Change Installer Name: </td><td><?echo $row[0]["inst_cur_location"];?></td></tr>
 -->
         <tr>
           <td>Problem:</td>
@@ -2046,9 +1765,9 @@ $sales=mysql_fetch_array(mysql_query("select name from sales_person where id='".
           <td><? if($row[0]['fwd_reason'] != "" && $row[0]['fwd_tech_rm_id'] != "" && $row[0]['fwd_repair_id'] == "") {
             echo $row[0]['fwd_datetime'].' - '.$row[0]['fwd_reason'];
         } else if($row[0]['fwd_serv_to_repair'] != "" && $row[0]['fwd_repair_id'] == "") {
-            echo $row[0]['fwd_serv_to_repair']; 
+            echo $row[0]['fwd_serv_to_repair'];
         } else if($row[0]['fwd_serv_to_repair'] != "" && $row[0]['fwd_repair_id'] != "") {
-            echo $row[0]['fwd_repair_date'].' - '.$row[0]['fwd_serv_to_repair']; 
+            echo $row[0]['fwd_repair_date'].' - '.$row[0]['fwd_serv_to_repair'];
         }
     ?></td>
         </tr>
@@ -2072,156 +1791,14 @@ $sales=mysql_fetch_array(mysql_query("select name from sales_person where id='".
             </strong></td>
         </tr>
         <tr>
-          <td>Service Done At: </td>
+        <td>Service Done At: </td>
           <td><?echo $row[0]["time"];?></td>
         </tr>
     </table>
   </div>
 </div>
 <? }
-
-elseif($tablename=="services_third_party")
-        {
-          	$query = "SELECT * FROM ".$tablename." where id=".$RowId;
-            $row=select_query($query);
-                        
-    ?>
-<div id="databox">
-  <div class="heading"><? echo $row[0]["service_reinstall"];?> Details</div>
-  <div class="dataleft">
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <td> Date </td>
-          <td><?echo $row[0]["req_date"];?></td>
-        </tr>
-        <tr>
-          <td>Client Name </td>
-          <td><?echo $row[0]["name"];?></td>
-        </tr>
-        <tr>
-          <td>Company Name </td>
-          <td><?echo $row[0]["company_name"];?></td>
-        </tr>
-        <tr>
-          <td>Registration No </td>
-          <td><?echo $row[0]["veh_reg"];?></td>
-        </tr>
-        <tr>
-          <td>Device IMEI: </td>
-          <td><?echo $row[0]["device_imei"];?></td>
-        </tr>
-        <tr>
-          <td>SIM No: </td>
-          <td><?echo $row[0]["sim_no"];?></td>
-        </tr>
-        <tr>
-          <td>Device Model:</td>
-          <td><?echo $row[0]["device_model"];?></td>
-        </tr>
-        <tr>
-          <td>Vehicle Type:</td>
-          <td><?echo $row[0]["vehicle_type"];?></td>
-        </tr>
-        <tr>
-          <td>City: </td>
-          <td><?echo $row[0]["city"];?></td>
-        </tr>
-        <tr>
-          <td>Location: </td>
-          <td><?echo $row[0]["location"];?></td>
-        </tr>
-        <tr>
-          <td>Available Status: </td>
-          <td><?echo $row[0]["atime_status"];?></td>
-        </tr>
-        <tr>
-          <td>Available Time: </td>
-          <td><?echo $row[0]["atime"];?></td>
-        </tr>
-        <tr>
-          <td>To Available Time: </td>
-          <td><?echo $row[0]["atimeto"];?></td>
-        </tr>
-        <tr>
-          <td>Person Name: </td>
-          <td><?echo $row[0]["pname"];?></td>
-        </tr>
-        <tr>
-          <td>Designation: </td>
-          <td><?echo $row[0]["designation"];?></td>
-        </tr>
-        <tr>
-          <td>Contact No: </td>
-          <td><?echo $row[0]["cnumber"];?></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="dataright">
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <td>Alternative Contact Person: </td>
-          <td><?echo $row[0]["pname_two"];?></td>
-        </tr>
-        <tr>
-          <td>Designation: </td>
-          <td><?echo $row[0]["designation_two"];?></td>
-        </tr>
-        <tr>
-          <td>Contact No: </td>
-          <td><?echo $row[0]["cnumber_two"];?></td>
-        </tr>
-        <tr>
-          <td>Job: </td>
-          <td><?echo $row[0]["service_reinstall"];?></td>
-        </tr>
-        <? if($_SESSION['username'] == 'clientservice'){?>
-        <tr>
-          <td>Reason To Back Services:</td>
-          <td><?echo $row[0]["back_reason"];?></td>
-        </tr>
-        <tr>
-          <td>Installer Name: </td>
-          <td><?echo $row[0]["inst_name"];?></td>
-        </tr>
-        <tr>
-          <td>Installer Current Location: </td>
-          <td><?echo $row[0]["inst_cur_location"];?></td>
-        </tr>
-        <tr>
-          <td>Problem:</td>
-          <td><?echo $row[0]["reason"];?></td>
-        </tr>
-        <tr>
-          <td>Problem Due to:</td>
-          <td><?echo $row[0]["problem_in_service"];?></td>
-        </tr>
-        <tr>
-          <td>Reason:</td>
-          <td><?echo $row[0]["problem"];?></td>
-        </tr>
-        <? } ?>
-        <tr>
-          <td><strong>Process Pending </strong></td>
-          <td><strong>
-            <? if($row[0]["service_status"]==1 && $row[0]['read_unread_status'] == '0'){echo "Unopened Ticket";}
-                elseif($row[0]["service_status"]==1 && $row[0]['read_unread_status'] == '1'){echo "Ticket Process";}
-				elseif($row[0]["service_status"]==2 ){echo "Ticket Assign To Installer";}
-                elseif($row[0]["service_status"]==3 ){echo "Back Ticket";}
-                elseif($row[0]["service_status"]==5 ){echo "Ticket closed";}?>
-            </strong></td>
-        </tr>
-        <tr>
-          <td>Service Done At: </td>
-          <td><?echo $row[0]["time"];?></td>
-        </tr>
-    </table>
-  </div>
-</div>
-<? }
-  elseif($tablename=="services_crack")
+  else If($tablename=="services_crack")
   {
            $query = "SELECT * FROM services_crack left join re_city_spr_1 on services_crack.Zone_area =re_city_spr_1.id  where services_crack.id=".$RowId; 
             $row=select_query($query);
@@ -2262,37 +1839,18 @@ elseif($tablename=="services_third_party")
           <td>Company Name </td>
           <td><?echo $row[0]["company_name"];?></td>
         </tr>
-      <!--   <tr>
+        <tr>
           <td>Registration No </td>
           <td><?echo $row[0]["veh_reg"];?></td>
-        </tr> -->
-      <!--   <tr>
+        </tr>
+        <tr>
           <td>Device Model: </td>
-          <td><?echo $row[0]["model"];?></td>
-        </tr> -->
-
-        <tr>
-        <?php
-        //$sqlDevice=select_query("SELECT device_type FROM device_type where id='".$row[0]["device_model"]."' ");
-          $sqlDevice=select_query("SELECT item_name FROM item_master where item_id='".$row[0]["device_type"]."'");
-      //  echo "SELECT item_name FROM item_master where item_id='".$row[0]["device_type"]."'"; die;
-         $sqlModel=select_query("SELECT item_name FROM item_master where item_id='".$row[0]["device_model"]."'"); 
-          ?>
-          <tr>
-            <td>Device Type:</td>
-          <td><?echo $sqlDevice[0]["item_name"];?></td>
+          <td><?echo $row[0]["device_model"];?></td>
         </tr>
         <tr>
-           <td>Device Model:</td>
-           <td><?echo $sqlModel[0]["item_name"];?></td>
-        </tr>
-        <tr>
-
-
-        <!-- <tr>
           <td>Device IMEI: </td>
           <td><?echo $row[0]["device_imei"];?></td>
-        </tr> -->
+        </tr>
         <tr>
           <td>Date Of Installation: </td>
           <td><?echo $row[0]["date_of_installation"];?></td>
@@ -2447,54 +2005,12 @@ elseif($tablename=="services_third_party")
         <td>Service Done At: </td>
           <td><?echo $row[0]["time"];?></td>
         </tr>
-
     </table>
   </div>
-
-
-<div>
-   <?php 
-  if($row[0]["service_reinstall"] == 'crack'){
- ?>   
- <div style="padding-top:20px">
-   <table border="2" width="100%" cellspacing="2" cellpadding="2">
-     
-      <thead>
-        <tr>
-          <td width="20%"><b>Veh Reg No.:</b></td>
-           <td width="80%">
-            <?php
-
-              $veh_reg = $row[0]["veh_reg"];
-              //$newveh_reg = wordwrap($veh_reg, 21, "\n", true);
-
-              echo "$veh_reg\n";
-
-            ?>
-          </td>
-        </tr>
-        <tr>
-          <td width="20%"><b>Veh Device IMEI:</b></td>
-           <td width="80%">
-            <?php
-
-              $deviceIMEI = $row[0]["device_imei"];
-              //$newdeviceIMEI = wordwrap($deviceIMEI, 21, "\n", true);
-
-              echo "$deviceIMEI\n";
-
-            ?>
-          </td>
-        </tr>
-      </thead>
-   </table>
- </div>
- <?php } ?>
- </div>
 </div>
 
-<? }
-elseif($tablename=="services_history_tbl")
+    <? }
+else If($tablename=="services_history_tbl")
         {
           $query = "SELECT * FROM services_history_tbl left join re_city_spr_1 on services_history_tbl.Zone_area =re_city_spr_1.id  where services_history_tbl.id=".$RowId;
           $row=select_query($query);
@@ -2621,7 +2137,7 @@ elseif($tablename=="services_history_tbl")
           <td>Installer Current Location: </td>
           <td><?echo $row[0]["inst_cur_location"];?></td>
         </tr>
-        <!--<tr><td>Change Installer Name: </td><td><?echo $row[0]["inst_cur_location"];?></td></tr> 
+        <!--<tr><td>Change Installer Name: </td><td><?echo $row[0]["inst_cur_location"];?></td></tr>
 -->
         <tr>
           <td>Problem:</td>
@@ -2650,9 +2166,9 @@ elseif($tablename=="services_history_tbl")
           <td><? if($row[0]['fwd_reason'] != "" && $row[0]['fwd_tech_rm_id'] != "" && $row[0]['fwd_repair_id'] == "") {
             echo $row[0]['fwd_datetime'].' - '.$row[0]['fwd_reason'];
         } else if($row[0]['fwd_serv_to_repair'] != "" && $row[0]['fwd_repair_id'] == "") {
-            echo $row[0]['fwd_serv_to_repair']; 
+            echo $row[0]['fwd_serv_to_repair'];
         } else if($row[0]['fwd_serv_to_repair'] != "" && $row[0]['fwd_repair_id'] != "") {
-            echo $row[0]['fwd_repair_date'].' - '.$row[0]['fwd_serv_to_repair']; 
+            echo $row[0]['fwd_repair_date'].' - '.$row[0]['fwd_serv_to_repair'];
         }
     ?></td>
         </tr>
@@ -2675,7 +2191,7 @@ elseif($tablename=="services_history_tbl")
                 elseif($row[0]["service_status"]==5 || $row[0]["service_status"]==6){echo "Service Close";}?>
             </strong></td>
         </tr>
-        <tr>
+         <tr>
           <td>Service Done At: </td>
           <td><?echo $row[0]["time"];?></td>
         </tr>
@@ -2684,7 +2200,7 @@ elseif($tablename=="services_history_tbl")
 </div>
 <? }
    
-        else If($tablename=="comment")
+        else if($tablename=="comment")
         {
         //"select * from comment where service_id='".$service_id."' order by date desc"
         
@@ -2698,7 +2214,43 @@ elseif($tablename=="services_history_tbl")
       <tr>
         <td><?
 
-$data=select_query_live_con("select * from matrix.comment where service_id='".$RowId."' order by date desc limit 10");
+        // echo $_GET['page'];
+$offset = ($_GET['page'] - 1) * 10;
+$queryString = "select * from matrix.comment where service_id='".$RowId."' order by date desc limit 10 OFFSET ".$offset.";";
+// echo $queryString;
+$data=select_query_live_con($queryString);
+$allRows=select_query_live_con("select * from matrix.comment where service_id='".$RowId."' order by date desc");
+
+################# Pagination By Neeraj_(16/01/2018) ###########################
+
+    $totalRows = count($allRows);
+    $rowsPerPage = 10;
+    $totalPages = ceil($totalRows / $rowsPerPage);
+    $pageCounter = 1;
+    $allPaginationLink = '';
+    $currentPage = $_GET['page'];
+    $pevPage = ($currentPage - 1);  
+    
+    if(ceil($totalPages) > 1){
+          
+          $htmlBody.= '<br><br><button class="button" onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$pageCounter.'&RowId='.$RowId.'&tablename='.$tablename.'\')">First</button>'; 
+          
+          if($currentPage < $totalPages){
+          $htmlBody.= '<button class="button" onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.++$currentPage.'&RowId='.$RowId.'&tablename='.$tablename.'\')">Next</button>';
+          }
+           if($_GET['page'] > 1){
+          $htmlBody.= '<button class="button" onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$pevPage.'&RowId='.$RowId.'&tablename='.$tablename.'\')">Previous</button>';
+          }
+          
+          $htmlBody.= '<button class="button" onclick="Show_record_pagination(\'userInfo.php?action=getrowsValue&page='.$totalPages.'&RowId='.$RowId.'&tablename='.$tablename.'\')">Last</button>'; 
+
+          $htmlBody.= '<button class="button button4">'."<b>Page ".$_GET['page']." of ". $totalPages."</b></button>";  
+
+          
+       
+    }
+
+################################################################################
 
 if(count($data)>0)
 {
@@ -2718,7 +2270,11 @@ for($c=0;$c<count($data);$c++)
 
     echo '<hr>&nbsp;</hr>';*/
     }
+    //echo '<tr><th colspan="3" style="border-collapse: collapse;">'.$htmlBody.'</th></tr>';
     echo '</table>';
+    echo '<table cellspacing="0" cellpadding="0" border="0" width="100%" >';
+    echo '<tr><th colspan="3" style="border-collapse: collapse;">'.$htmlBody.'</th></tr>';
+    echo '</table>';    
 
  }
  else
@@ -2730,6 +2286,10 @@ for($c=0;$c<count($data);$c++)
  ?></td>
       </tr>
     </table>
+<?php
+    
+?>
+
   </div>
 </div>
 <? }
@@ -2790,7 +2350,7 @@ if(count($stock_in_beg)>0)
 </div>
 <? }
     
-	else If($tablename == 'Showvehicleonmap')
+    else If($tablename == 'Showvehicleonmap')
     {
         
         $latitude = $_GET["latitude"];
@@ -2857,11 +2417,10 @@ Vehicle_Map('Showvehicleonmap',<?=$latitude?>,'<?=$longitude?>');
       </div>
   </div>
 </div>
-<? 
+<?
 
 }
-	
-	else If($tablename=="deletion")
+else If($tablename=="deletion")
         {
         $query = "SELECT * FROM ".$tablename." where id=".$RowId;
             $row=select_query($query);
@@ -3035,7 +2594,7 @@ else
   </div>
 </div>
 <? }
-    else If($tablename=="vehicle_no_change")
+ else If($tablename=="vehicle_no_change")
         {
          $query = "SELECT * FROM ".$tablename." where id=".$RowId;
             $row=select_query($query);
@@ -3201,101 +2760,7 @@ else
   </div>
 </div>
 <? }
-    
-elseIf($tablename=="sub_user_creation")
-        {
-
-          $query = "SELECT * FROM ".$tablename." where id=".$RowId;
-            $row=select_query($query);
-
-    ?><div id="databox">
-<div class="heading">Sub User Creation</div>
-<div class="dataleft"><table cellspacing="2" cellpadding="2">
-    <tbody>
- <tr><td>Date    </td><td><?echo date("d-M-Y h:i:s A",strtotime($row[0]["date"]));?></td></tr>
-<? /*if($row[0]["acc_manager"]=='saleslogin') {
-$account_manager=$row[0]["sales_manager"];
-}
-else {
-$account_manager=$row[0]["acc_manager"];
-}*/
-
-?>
-<tr><td>Request By</td><td><?echo $row[0]["acc_manager"];?></td></tr>
-<tr><td>Account Manager</td><td><?echo $row[0]["sales_manager"];?></td></tr>
-<? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["main_user_id"];
-    $rowuser=select_query($sql);
-    ?>
-<tr><td>Client User Name     </td><td><?echo $rowuser[0]["sys_username"];?></td></tr>
-
- <tr><td>Company Name     </td><td><?echo $row[0]["company"];?></td></tr>
-<tr><td>Total No Of Vehicle     </td><td><?echo $row[0]["tot_no_of_vehicles"];?></td></tr>
-<!--<tr><td>Vehicle to move     </td><td><?echo $row[0]["reg_no_of_vehicle_to_move"];?></td></tr>-->
-
-<tr><td>Vehicle to move </td><td><?php $vechile_no = explode(",",$row[0]["reg_no_of_vehicle_to_move"]);
-for($i=0;$i<=count($vechile_no);$i++){ if($i%3!=0){ echo $vechile_no[$i].", ";}else { echo "<br/>".$vechile_no[$i].", ";} }?></td></tr>
-
-<tr><td>Contact Person     </td><td><?echo $row[0]["contact_person"];?></td></tr>
-<tr><td>Contact Number     </td><td><?echo $row[0]["contact_number"];?></td></tr>
-<tr><td>Sub-User Name     </td><td><?echo $row[0]["name"];?></td></tr>
-<tr><td>Password</td><td><?echo $row[0]["req_sub_user_pass"];?></td></tr>
-
-<tr><td>Reason</td><td><?echo $row[0]["reason"];?></td></tr>
-
-</tbody></table></div>
-<div class="dataright">
-<table cellspacing="2" cellpadding="2"><tbody>
-<tr><td>Main User Separate</td><td><?echo $row[0]["billing_separate"];?></td></tr>
-<tr><td>Billing Name</td><td><?echo $row[0]["billing_name"];?></td></tr>
-<tr><td>Billing Address</td><td><?echo $row[0]["billing_address"];?></td></tr>
- <!--<tr><td>Admin Approval</td>  <td><?if($row[0]["approve_status"]==1) echo "Approved"; else echo "Pending Approval"?></td></tr>-->
-<tr><td><strong>Process Pending </strong></td>  <td><strong>
-<?  if($row[0]["sub_user_status"]==2 || (($row[0]["support_comment"]!="" || $row[0]["admin_comment"]!="") && $row[0]["sales_comment"]==""))
-    {echo "Reply Pending at Request Side";}
-    elseif($row[0]["approve_status"]==0 && $row[0]["forward_req_user"]!="" && $row[0]["forward_back_comment"]=="" && $row[0]["sub_user_status"]==1)   
-    {echo "Pending Admin Approval (Req Forward to ".$row[0]["forward_req_user"].")";}
-    elseif($row[0]["approve_status"]==0 && $row[0]["final_status"]==0 && $row[0]["sub_user_status"]==1){echo "Pending Admin Approval";}
-    elseif($row[0]["approve_status"]==1 && $row[0]["sub_user_status"]==1 && $row[0]["final_status"]!=1){echo "Pending at Tech Support Team";}
-    elseif($row[0]["final_status"]==1){echo "Process Done";}?></strong></td></tr>
-
-<tr><td>Account Comment</td>  <td><?echo $row[0]["account_comment"];?></td></tr>
-<tr><td>Sales Comment</td>  <td><?echo $row[0]["sales_comment"];?></td></tr>
-<tr><td>Support Comment</td><td><?echo $row[0]["support_comment"];?></td></tr>
-<tr><td>Admin Comment</td><td><?echo $row[0]["admin_comment"];?></td></tr>
-<tr><td>Req Forwarded to</td><td><?echo $row[0]["forward_req_user"];?></td></tr>
-<tr><td>Forward Comment</td><td><?echo $row[0]["forward_comment"];?></td></tr>
-<tr><td>F/W Request Back Comment</td><td><?echo $row[0]["forward_back_comment"];?></td></tr><tr><td>Approval Date</td><td><?
-if($row[0]["approve_status"]==1 && $row[0]["approve_date"]!='')
-{
-echo date("d-M-Y h:i:s A",strtotime($row[0]["approve_date"]));
-}
-else
-{
-    echo "";
-}
-
-?></td></tr>
-<tr><td>Closed Date</td><td><?
-if($row[0]["final_status"]==1 && $row[0]["close_date"]!='')
-{
-echo date("d-M-Y h:i:s A",strtotime($row[0]["close_date"]));
-}
-else
-{
-    echo "";
-}
-
-?></td>
-    </tr>
-</tbody>
-    </table>
-    </div>
-    </div>
-
-
-    <? }
-		
-	else If($tablename=="sim_change")
+    else If($tablename=="sim_change")
         {
         $query = "SELECT * FROM ".$tablename." where id=".$RowId;
             $row=select_query($query);
@@ -3404,7 +2869,6 @@ else
 {
     echo "";
 }
-
 ?></td>
         </tr>
         <?php if($row[0]["close_comment"]!=""){?>
@@ -3487,42 +2951,26 @@ else
 <? }
 elseIf($tablename=="new_account_creation")
         {
-   			$query = "SELECT * FROM ".$tablename." where id=".$RowId;
+    $query = "SELECT * FROM ".$tablename." where id=".$RowId;
             $row=select_query($query);
-			
-			$ModelData = select_query("select * from new_account_model_master where is_active='0' and new_account_reqid='".$RowId."' ");
-			$modelcount = count($ModelData);
-			
-			$oldModelData = select_query("select * from new_account_model_master where is_active='1' and new_account_reqid='".$RowId."' ");
-			$oldmodelcount = count($oldModelData);
-			
-			if($row[0]["collection_manager"] != ''){
-				$coll_mng = select_query("select * from collection_agent where id='".$row[0]["collection_manager"]."' and is_active='1'; ");
-				$coll_mng_name = $coll_mng[0]['name'];
-			}else { $coll_mng_name = '';} 
-			
-			$toolName=array(); 
-			$toolkitId = explode("#",$row[0]['accessories_tollkit']);
-	
-			for($i=0;$i<=count($toolkitId);$i++){
-	
-			  $sqlToolsName=select_query("select toolkit_access.items from toolkit_access where id='".$toolkitId[$i]."'");
-	
-			  array_push($toolName, $sqlToolsName[0]['items']);
-	
-			}
-			
-			$strTools = implode(",",$toolName);
     ?>
 <div id="databox">
   <div class="heading">New account creation</div>
-  <div class="dataleft2">
+  <div class="dataleft">
     <table cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
-          <td>Date</td>
-          <td><?echo date("d-M-Y h:i:s A",strtotime($row[0]["date"]));?></td>
+          <td><strong>Date</strong></td>
+          <td><?echo $row[0]["date"];?></td>
         </tr>
+        <? /* if($row[0]["account_manager"]=='saleslogin') {
+$account_manager=$row[0]["sales_manager"];
+}
+else {
+$account_manager=$row[0]["account_manager"];
+}*/
+
+?>
         <tr>
           <td>Request By</td>
           <td><?echo $row[0]["account_manager"];?></td>
@@ -3532,348 +2980,196 @@ elseIf($tablename=="new_account_creation")
           <td><?echo $row[0]["sales_manager"];?></td>
         </tr>
         <tr>
-          <td>Company</td>
+          <td><strong>Company</strong></td>
           <td><?echo $row[0]["company"];?></td>
         </tr>
         <tr>
-          <td>Potential</td>
+          <td><strong>Potential</strong></td>
           <td><?echo $row[0]["potential"];?></td>
         </tr>
         <tr>
-          <td>Contact Person</td>
+          <td><strong>Contact Person</strong></td>
           <td><?echo $row[0]["contact_person"];?></td>
         </tr>
         <tr>
-          <td>Contact Number</td>
+          <td><strong>Contact Number</strong></td>
           <td><?echo $row[0]["contact_number"];?></td>
         </tr>
         <tr>
-          <td>Billing Address</td>
+          <td><strong>Billing Name</strong></td>
+          <td><?echo $row[0]["billing_name"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Billing Address</strong></td>
           <td><?echo $row[0]["billing_address"];?></td>
         </tr>
         <tr>
-          <td>E-Mail ID</td>
-          <td><?echo $row[0]["email_id"];?></td>
+          <td><strong>Type of Organisation</strong></td>
+          <td><?echo $row[0]["type_of_org"];?></td>
         </tr>
         <tr>
-          <td>User Name</td>
-          <td><?echo $row[0]["user_name"];?></td>
+          <td><strong>PAN No.</strong></td>
+          <td><?echo $row[0]["pan_no"];?></td>
         </tr>
         <tr>
-          <td>Password</td>
-          <td><?echo $row[0]["user_password"];?></td>
+          <td><strong> Copy of Pan Card</strong></td>
+          <td><?echo $row[0]["pan_card"];?></td>
         </tr>
         <tr>
-          <td>Vehicle type</td>
-          <td><?echo $row[0]["vehicle_type"];?></td>
+          <td><strong>Copy of Address Proof</strong></td>
+          <td><?echo $row[0]["address_proof"];?></td>
         </tr>
+        <tr>
+          <td><strong>mode of payment</strong></td>
+          <td><?echo $row[0]["mode_of_payment"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Demo Period</strong></td>
+          <td><?echo $row[0]["demo_time"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Device Price</strong></td>
+          <td><?echo $row[0]["device_price"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Vat(5%)</strong></td>
+          <td><?echo $row[0]["device_price_vat"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Total </strong></td>
+          <td><?echo $row[0]["device_price_total"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Rent </strong></td>
+          <td><?echo $row[0]["device_rent_Price"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Service Tex(12.36%)</strong></td>
+          <td><?echo $row[0]["device_rent_service_tax"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Total Rent</strong></td>
+          <td><?echo $row[0]["DTotalREnt"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Dimts Fee status </strong></td>
+          <td><?echo $row[0]["dimts_fee"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Rent Status</strong></td>
+          <td><?echo $row[0]["rent_status"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Rent Month</strong></td>
+          <td><?echo $row[0]["rent_month"];?></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="dataright">
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
         <tr>
           <td>Dimts</td>
           <td><?echo $row[0]["dimts"];?></td>
         </tr>
         <tr>
-          <td>Dimts Fee status </td>
-          <td><?echo $row[0]["dimts_fee"];?></td>
+          <td><strong>Vehicle type</strong></td>
+          <td><?echo $row[0]["vehicle_type"];?></td>
         </tr>
         <tr>
-          <td>Collection Person</td>
-          <td><?echo $coll_mng_name;?></td>
-        </tr>
-        <tr>
-          <td>State</td>
-          <td><?echo $row[0]["client_state"];?></td>
-        </tr> 
-        <tr>
-          <td>Accessries Tools</td>
-          <td><? echo substr($strTools, 0, -1);?></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="dataright2">
-    <table cellspacing="2" cellpadding="2">
-      <tbody>
-        <tr>
-          <td>Type of Organisation</td>
-          <td><?echo $row[0]["type_of_org"];?></td>
-        </tr>
-         <tr>
-          <td>Device Warranty</td>
-          <td><? if($row[0]["vehicle_warranty"] != ''){echo $row[0]["vehicle_warranty"].' Year';} else{echo '';}?></td>
-        </tr>
-        <tr>
-          <td>Client PAN No.</td>
-          <td><?echo $row[0]["pan_no"];?></td>
-        </tr>
-        <tr>
-          <td>Client GST No.</td>
-          <td><?echo $row[0]["client_gst_no"];?></td>
-        </tr>
-        <tr>
-          <td>Immobilizer (Y/N)</td>
+          <td><strong>Immobilizer (Y/N)</strong></td>
           <td><?echo $row[0]["immobilizer"];?></td>
-        </tr>        
-        <tr>
-          <td>New Sales Comment</td>
-          <td><?echo $row[0]["new_acc_salescomment"];?></td>
         </tr>
+        <tr>
+          <td><strong>AC (ON/OFF)</strong></td>
+          <td><?echo $row[0]["ac_on_off"];?></td>
+        </tr>
+        <tr>
+          <td><strong>E_mail ID</strong></td>
+          <td><?echo $row[0]["email_id"];?></td>
+        </tr>
+        <tr>
+          <td><strong>User Name</strong></td>
+          <td><?echo $row[0]["user_name"];?></td>
+        </tr>
+        <tr>
+          <td><strong>Password</strong></td>
+          <td><?echo $row[0]["user_password"];?></td>
+        </tr>
+        <tr>
+          <td colspan="2">-------------------------------------------</td>
+        </tr>
+        
         <!-- <tr><td>Admin Approval</td>  <td><?if($row[0]["approve_status"]==1) echo "Approved"; else echo "Pending Approval"?></td></tr>-->
         <tr>
           <td><strong>Process Pending </strong></td>
           <td><strong>
             <?  if($row[0]["acc_creation_status"]==2 || (($row[0]["support_comment"]!="" || $row[0]["admin_comment"]!="") && $row[0]["sales_comment"]==""))
-	{echo "Reply Pending at Request Side";}
-	elseif($row[0]["approve_status"]==0 && $row[0]["forward_req_user"]!="" && $row[0]["forward_back_comment"]=="" && $row[0]["acc_creation_status"]==1)	
-	{echo "Pending Admin Approval (Req Forward to ".$row[0]["forward_req_user"].")";}
-	elseif($row[0]["approve_status"]==0 && $row[0]["acc_creation_status"]==1)
-	{echo "Pending Admin Approval";}
-	elseif($row[0]["approve_status"]==1 && $row[0]["acc_creation_status"]==1 && $row[0]["final_status"]!=1){echo "Pending at Tech Support Team";}
-	elseif($row[0]["approve_status"]==1 && $row[0]["final_status"]==1){echo "Process Done";}?>
+    {echo "Reply Pending at Request Side";}
+    elseif($row[0]["approve_status"]==0 && $row[0]["final_status"]==0 && $row[0]["acc_creation_status"]==1)
+    {echo "Pending Admin Approval";}
+    elseif($row[0]["approve_status"]==1 && $row[0]["acc_creation_status"]==1 && $row[0]["final_status"]!=1){echo "Pending at Tech Support Team";}
+    elseif($row[0]["final_status"]==1){echo "Process Done";}?>
             </strong></td>
         </tr>
         <tr>
-          <td>Account Comment</td>
+          <td><strong>Account Comment</strong></td>
           <td><?echo $row[0]["account_comment"];?></td>
         </tr>
         <tr>
-          <td>Sales Comment</td>
+          <td><strong>Sales Comment</strong></td>
           <td><?echo $row[0]["sales_comment"];?></td>
         </tr>
         <tr>
-          <td>Support Comment</td>
+          <td><strong>Support Comment</strong></td>
           <td><?echo $row[0]["support_comment"];?></td>
         </tr>
         <tr>
-          <td>Admin Comment</td>
+          <td><strong>Admin Comment</strong></td>
           <td><?echo $row[0]["admin_comment"];?></td>
         </tr>
         <tr>
-          <td>Req Forwarded to</td>
+          <td><strong>Req Forwarded to</strong></td>
           <td><?echo $row[0]["forward_req_user"];?></td>
         </tr>
         <tr>
-          <td>Forward Comment</td>
+          <td><strong>Forward Comment</strong></td>
           <td><?echo $row[0]["forward_comment"];?></td>
         </tr>
         <tr>
-          <td>F/W Request Back Comment</td>
+          <td><strong>F/W Request Back Comment</strong></td>
           <td><?echo $row[0]["forward_back_comment"];?></td>
         </tr>
         <tr>
-          <td>Approval Date</td>
+          <td><strong>Approval Date</strong></td>
           <td><?
-			if($row[0]["approve_status"]==1 && $row[0]["approve_date"]!='')
-			{
-			echo date("d-M-Y h:i:s A",strtotime($row[0]["approve_date"]));
-			}
-			else
-			{
-				echo "";
-			}
-			
-			?></td>
+if($row[0]["approve_status"]==1 && $row[0]["approve_date"]!='')
+{
+echo date("d-M-Y h:i:s A",strtotime($row[0]["approve_date"]));
+}
+else
+{
+    echo "";
+}
+
+?></td>
         </tr>
         <tr>
-          <td>Closed By</td>
-          <td><?echo $row[0]["req_close_by"];?></td>
-        </tr>
-        <tr>
-          <td>Closed Date</td>
+          <td><strong>Closed Date</strong></td>
           <td><?
-			if($row[0]["final_status"]==1 && $row[0]["close_date"]!='')
-			{
-			echo date("d-M-Y h:i:s A",strtotime($row[0]["close_date"]));
-			}
-			else
-			{
-				echo "";
-			}
-			
-			?></td>
+
+if($row[0]["final_status"]==1 && $row[0]["close_date"]!='')
+{
+echo date("d-M-Y h:i:s A",strtotime($row[0]["close_date"]));
+}
+else
+{
+    echo "";
+}?></td>
         </tr>
-          </tr>
-        
-        <?php if($total_query9>0){?>
-        <tr>
-          <td colspan="2">-------------------------------------------</td>
-        </tr>
-        <tr>
-          <td colspan="2"><table cellspacing="2" cellpadding="2">
-              <tbody>
-                <tr>
-                  <td align="left">Req Forwarded to</td>
-                  <td>Forward Comment</td>
-                  <td>F/W Request Back Comment</td>
-                </tr>
-                <?php for($at=0;$at<count($forward_query9);$at++){?>
-                <tr>
-                  <td><?php echo $forward_query9[$at]["forward_req_user"];?></td>
-                  <td><?php echo $forward_query9[$at]["forward_comment"];?></td>
-                  <td><?php echo $forward_query9[$at]["forward_back_comment"];?></td>
-                </tr>
-                <?php } ?>
-              </tbody>
-            </table></td>
-        </tr>
-        <?php } ?>
       </tbody>
     </table>
-  </div>
-  <div>&nbsp;</div>
-  <div class="datacenter">
-	<table cellspacing="2" cellpadding="2" border="1">
-      <tbody>
-		<?php if($modelcount>0){?>
-        <tr>
-              <th align="left">SrNo.</th>
-              <th align="left">DeviceType</th>
-              <th align="left">modelType</th>
-              <th align="left">AccountType</th>
-              <th align="left">PaymentMode</th>
-              <th align="left">RentPlan</th>
-        </tr>
-        <tr>
-        	<td colspan="6" style="background-color:#FF6"><font style="color:#000;font-weight:bold;">Pending Model for Approval</font></td>
-        </tr>
-       <?php for($gm=0;$gm<$modelcount;$gm++){
-				
-			   if($ModelData[$gm]["rent_month"] == '1'){$plan = 'Monthly';}
-			   elseif($ModelData[$gm]["rent_month"] == '3'){$plan = 'Quarterly';}
-			   elseif($ModelData[$gm]["rent_month"] == '6'){$plan = 'HalfYearly';}
-			   elseif($ModelData[$gm]["rent_month"] == '12'){$plan = 'Yearly';}
-			   else{$plan = '--';}
-			   
-			   $getdevice = select_query("SELECT * FROM $internalsoftware.item_master  WHERE item_id=".$ModelData[$gm]["device_type"]);
-			   $getmodel = select_query("SELECT * FROM $internalsoftware.item_master  WHERE item_id=".$ModelData[$gm]["device_model"]);
-		?>
-       <tr>
-       		  <td><? echo $gm+1;?></td>
-              <td><strong><? echo $getdevice[0]["item_name"];?></strong></td>
-              <td><strong><? echo $getmodel[0]["item_name"];?></strong></td>
-              <td><strong><? echo $ModelData[$gm]["account_type"];?></strong></td>
-              <td><strong><? echo $ModelData[$gm]["mode_of_payment"];?></strong></td>
-              <td><strong><? echo $plan;?></strong></td>
-       </tr>
-       <?php if($ModelData[$gm]["mode_of_payment"] == 'Billed' || $ModelData[$gm]["mode_of_payment"] == 'CashClient'){ ?>
-       <tr>    
-              <td>&nbsp;</td>
-              <td>DPrice - <? echo $ModelData[$gm]["device_price"];?></td>
-              <td>Status - <? echo $ModelData[$gm]["device_status"];?></td>
-              <td>Tax(18%) - <? echo $ModelData[$gm]["device_price_vat"];?></td>
-              <td>DTotal - <? echo $ModelData[$gm]["device_price_total"];?></td>
-        </tr>
-        <tr>    
-              <td>&nbsp;</td>
-              <td>RPrice - <? echo $ModelData[$gm]["device_rent_Price"];?></td>
-              <td>Status - <? echo $ModelData[$gm]["rent_status"];?></td>
-              <td>STax(18%) - <? echo $ModelData[$gm]["device_rent_service_tax"];?></td>
-              <td>RTotal - <? echo $ModelData[$gm]["DTotalREnt"];?> </td>
-        </tr> 
-       <?php } elseif($ModelData[$gm]["account_type"] == 'Foc'){ ?>
-		  <tr>    
-              <td>&nbsp;</td>
-              <td colspan="4">FOC Reason - <? echo $ModelData[$gm]["foc_reason"];?></td>
-          </tr>
-       <?php } elseif($ModelData[$gm]["account_type"] == 'Demo'){ ?>
-		  <tr>    
-              <td>&nbsp;</td>
-              <td colspan="2">Demo Period - <? echo $ModelData[$gm]["demo_time"]." Days";?></td>
-          </tr>
-       <?php } elseif($ModelData[$gm]["account_type"] == 'InternalTesting'){ ?>
-		  <tr>    
-              <td>&nbsp;</td>
-              <td colspan="2">Testing Period - <? echo $ModelData[$gm]["testing_time"]." Days";?></td>
-          </tr>
-       <?php } 
-	      } 
-	   }
-	   if($oldmodelcount>0){ 
-	   ?>   
-	   <tr>
-        	<td colspan="6" style="background-color:#99FF66"><font style="color:#000;font-weight:bold;">Approved Model</font></td>
-        </tr>
-       <?php for($gd=0;$gd<$oldmodelcount;$gd++){
-				
-			   if($oldModelData[$gd]["rent_month"] == '1'){$plan = 'Monthly';}
-			   elseif($oldModelData[$gd]["rent_month"] == '3'){$plan = 'Quarterly';}
-			   elseif($oldModelData[$gd]["rent_month"] == '6'){$plan = 'HalfYearly';}
-			   elseif($oldModelData[$gd]["rent_month"] == '12'){$plan = 'Yearly';}
-			   else{$plan = '--';}
-			   
-			   $getdevice = select_query("SELECT * FROM internalsoftware.item_master  WHERE item_id=".$oldModelData[$gd]["device_type"]);
-			   $getmodel = select_query("SELECT * FROM internalsoftware.item_master  WHERE item_id=".$oldModelData[$gd]["device_model"]);
-		?>
-       <tr>
-       		  <td><? echo $gd+1;?></td>
-              <td><strong><? echo $getdevice[0]["item_name"];?></strong></td>
-              <td><strong><? echo $getmodel[0]["item_name"];?></strong></td>
-              <td><strong><? echo $oldModelData[$gd]["account_type"];?></strong></td>
-              <td><strong><? echo $oldModelData[$gd]["mode_of_payment"];?></strong></td>
-              <td><strong><? echo $plan;?></strong></td>
-       </tr>
-       <?php if($oldModelData[$gd]["mode_of_payment"] == 'Billed' || $oldModelData[$gd]["mode_of_payment"] == 'CashClient'){ ?>
-       <tr>    
-              <td>&nbsp;</td>
-              <td>DPrice - <? echo $oldModelData[$gd]["device_price"];?></td>
-              <td>Status - <? echo $oldModelData[$gd]["device_status"];?></td>
-              <td>Tax(18%) - <? echo $oldModelData[$gd]["device_price_vat"];?></td>
-              <td>DTotal - <? echo $oldModelData[$gd]["device_price_total"];?></td>
-        </tr>
-        <tr>    
-              <td>&nbsp;</td>
-              <td>RPrice - <? echo $oldModelData[$gd]["device_rent_Price"];?></td>
-              <td>Status - <? echo $oldModelData[$gd]["rent_status"];?></td>
-              <td>STax(18%) - <? echo $oldModelData[$gd]["device_rent_service_tax"];?></td>
-              <td>RTotal - <? echo $oldModelData[$gd]["DTotalREnt"];?> </td>
-        </tr> 
-       <?php } elseif($oldModelData[$gd]["account_type"] == 'Foc'){ ?>
-		  <tr>    
-              <td>&nbsp;</td>
-              <td colspan="4">FOC Reason - <? echo $oldModelData[$gd]["foc_reason"];?></td>
-          </tr>
-       <?php } elseif($oldModelData[$gd]["account_type"] == 'Demo'){ ?>
-		  <tr>    
-              <td>&nbsp;</td>
-              <td colspan="2">Demo Period - <? echo $oldModelData[$gd]["demo_time"]." Days";?></td>
-          </tr>
-       <?php } elseif($oldModelData[$gd]["account_type"] == 'InternalTesting'){ ?>
-		  <tr>    
-              <td>&nbsp;</td>
-              <td colspan="2">Testing Period - <? echo $oldModelData[$gd]["testing_time"]." Days";?></td>
-          </tr>
-       <?php } 
-	      } 	   
-	   }
-	   if($modelcount==0 && $oldmodelcount==0)
-	   {
-	   ?>
-       <tr>
-              <th align="left">AccountType</th>
-              <th align="left">PaymentMode</th>
-              <th align="left">DevicePrice</th>
-              <th align="left">Total Price</th>
-              <th align="left">Rent</th>
-              <th align="left">Total Rent</th>
-              <th align="left">RentMonth</th>
-              <th align="left">RentStatus</th>
-              <th align="left">DemoPeriod</th>
-              <th align="left">FOCReason</th>
-        </tr> 
-       <tr>
-              <td><strong><? echo $row[0]["account_type"];?></strong></td>
-              <td><strong><? echo $row[0]["mode_of_payment"];?></strong></td>
-              <td><? echo $row[0]["device_price"];?></td>
-              <td><? echo $row[0]["device_price_total"];?></td>
-              <td><? echo $row[0]["device_rent_Price"];?></td>
-              <td><? echo $row[0]["DTotalREnt"];?></td>
-              <td><? if($row[0]["rent_month"]!=""){echo $row[0]["rent_month"]." Month";}?></td>
-              <td><? echo $row[0]["rent_status"];?></td>
-              <td><? if($row[0]["demo_time"]!=""){echo $row[0]["demo_time"];}?></td>
-              <td><? echo $row[0]["foc_reason"];?></td>
-       </tr>
-       <?php } ?>
-       </tbody>
-     </table>         
   </div>
 </div>
 <? }
@@ -3962,7 +3258,7 @@ $biliing_status=$row[0]["billing"];
 else{
 $biliing_status=$row[0]["billing_if_old_device"];
 }
-    ?>
+?>
       <tr>
         <td>Billing</td>
         <td><?echo $biliing_status;?></td>
@@ -4183,7 +3479,7 @@ elseif($tablename=="device_change")
         <td><strong>
           <?  if(($row[0]["device_change_status"]==2 && $row[0]["rdd_device_type"]!="New") || (($row[0]["support_comment"]!="" || ($row[0]["admin_comment"]!="" && $row[0]["rdd_device_type"]!="New")) && $row[0]["service_comment"]=="")){echo "Reply Pending at Request Side";}            
     elseif($row[0]["rdd_device_imei"]=="" && $row[0]["rdd_reason"]=="" && $row[0]["approve_status"]==0){echo "Request Not Completely Generate.";}
-    elseif($row[0]["account_comment"]=="" && $row[0]["pay_status"]=="" && $row[0]["rdd_reason"]!="" && $row[0]["approve_status"]==0){echo "Pending at Accounts";} 
+    elseif($row[0]["account_comment"]=="" && $row[0]["pay_status"]=="" && $row[0]["rdd_reason"]!="" && $row[0]["approve_status"]==0){echo "Pending at Accounts";}
     elseif($row[0]["rdd_device_type"]=="New" && ($row[0]["service_support_com"]=='' || $row[0]["device_change_status"]==2) && $row[0]["approve_status"]==0){echo "Pending at Delhi Service Support Login";}
     elseif($row[0]["approve_status"]==0 && $row[0]["forward_req_user"]!="" && $row[0]["forward_back_comment"]=="" && $row[0]["device_change_status"]==1)    
     {echo "Pending Admin Approval (Req Forward to ".$row[0]["forward_req_user"].")";}
@@ -4805,187 +4101,7 @@ else
 </div>
 <? }
 
-else If($tablename=="reactivation_of_account")
-        {
-         $query = "SELECT * FROM ".$tablename." where id=".$RowId;
-            $row=select_query($query);
-
-
- 
-    ?><div id="databox">
-<div class="heading">Reactivation Of Account</div>
-<div class="dataleft"><table cellspacing="2" cellpadding="2">
-    <tbody>
-<tr><td>Date </td><td><?echo date("d-M-Y h:i:s A",strtotime($row[0]["date"]));?></td></tr>    
-<? /*if($row[0]["acc_manager"]=='saleslogin') {
-$account_manager=$row[0]["sales_manager"];
-}
-else {
-$account_manager=$row[0]["acc_manager"];
-}*/
-
-?>
-<tr><td>Request By</td><td><?echo $row[0]["acc_manager"];?></td></tr>
-<tr><td>Account Manager</td><td><?echo $row[0]["sales_manager"];?></td></tr>
-<? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["user_id"];
-    $rowuser=select_query($sql);
-    ?>
-<tr><td>Client User Name     </td><td><?echo $rowuser[0]["sys_username"];?></td></tr>   
-<tr><td>Company Name </td><td><?echo $row[0]["company"];?></td></tr>    
-<tr><td>Total No Of Vehicle </td><td><?echo $row[0]["total_no_of_vehicles"];?></td></tr>    
-<tr><td>Deactivate Account</td><td><?echo $row[0]["deactivate_temp"];?></td></tr>
-<tr><td>Deactivate Reason</td><td><?echo $row[0]["deact_reason"];?></td></tr>
-<tr><td>Deactivate Req Date</td><td><?echo $row[0]["deact_req_date"];?></td></tr>
-<tr><td>Deactivate Close Date</td><td><?echo $row[0]["deact_close_date"];?></td></tr>
-
-<tr><td>Reactivate Account Status</td><td><?echo $row[0]["reactivate_account_status"];?></td></tr>
-<tr><td>Reactivate Reason</td><td><?echo $row[0]["reason"];?></td></tr>
-
-</tbody></table></div>
-<div class="dataright">
-<table cellspacing="2" cellpadding="2"><tbody>
-
- <!--<tr><td>Admin Approval</td>  <td><?if($row[0]["approve_status"]==1) echo "Approved"; else echo "Pending Approval"?></td></tr>-->
-<tr><td><strong>Process Pending </strong></td>  <td><strong>
-<?  if($row[0]["reactivation_status"]==2 || (($row[0]["support_comment"]!="" || $row[0]["admin_comment"]!="") && $row[0]["sales_comment"]==""))
-    {echo "Reply Pending at Request Side";}
-    elseif($row[0]["account_comment"]=="" && $row[0]["pay_pending"]=="" && $row[0]["approve_status"]==0 && $row[0]["final_status"]==0){echo "Pending at Accounts";}
-    elseif($row[0]["approve_status"]==0 && $row[0]["forward_req_user"]!="" && $row[0]["forward_back_comment"]=="" && $row[0]["reactivation_status"]==1)   
-    {echo "Pending Admin Approval (Req Forward to ".$row[0]["forward_req_user"].")";}
-    elseif($row[0]["approve_status"]==0 && ($row[0]["account_comment"]!="" || $row[0]["pay_pending"]!="") && $row[0]["final_status"]==0 && $row[0]["reactivation_status"]==1)
-    {echo "Pending Admin Approval";}
-    elseif($row[0]["approve_status"]==1 && $row[0]["reactivation_status"]==1 && $row[0]["final_status"]!=1){echo "Pending at Tech Support Team";}
-    elseif($row[0]["final_status"]==1){echo "Process Done";}?></strong></td></tr>
-
-<tr><td>Pending Amount</td>  <td><?echo $row[0]["pay_pending"];?></td></tr>
-<tr><td>Account Comment</td>  <td><?echo $row[0]["account_comment"];?></td></tr>
-<tr><td>Sales Comment</td>  <td><?echo $row[0]["sales_comment"];?></td></tr>
-<tr><td>Support Comment</td><td><?echo $row[0]["support_comment"];?></td></tr>
-<tr><td>Admin Comment</td><td><?echo $row[0]["admin_comment"];?></td></tr>
-<tr><td>Req Forwarded to</td><td><?echo $row[0]["forward_req_user"];?></td></tr>
-<tr><td>Forward Comment</td><td><?echo $row[0]["forward_comment"];?></td></tr>
-<tr><td>F/W Request Back Comment</td><td><?echo $row[0]["forward_back_comment"];?></td></tr><tr><td>Approval Date</td><td><?
-if($row[0]["approve_status"]==1 && $row[0]["approve_date"]!='')
-{
-echo date("d-M-Y h:i:s A",strtotime($row[0]["approve_date"]));
-}
-else
-{
-    echo "";
-}
-
-?></td></tr>
-<tr><td>Closed Date</td><td><?
-if($row[0]["final_status"]==1 && $row[0]["close_date"]!='')
-{
-echo date("d-M-Y h:i:s A",strtotime($row[0]["close_date"]));
-}
-else
-{
-    echo "";
-}
-
-?></td>
-    </tr>
-</tbody>
-    </table>
-    </div>
-    </div>
-
-    <? }
-    
-else If($tablename=="software_request")
-        {
-        $query = "SELECT * FROM ".$tablename." where id=".$RowId;
-            $row=select_query($query);
-
-
-
-    ?><div id="databox">
-<div class="heading">Software Request</div>
-<div class="dataleft"><table cellspacing="2" cellpadding="2">
-    <tbody>
- 
-
-<tr><td>Date</td><td><?echo date("d-M-Y h:i:s A",strtotime($row[0]["date"]));?></td></tr>     
-<? /*if($row[0]["acc_manager"]=='saleslogin') {
-$account_manager=$row[0]["sales_manager"];
-}
-else {
-$account_manager=$row[0]["acc_manager"];
-}*/
-
-?>
-<tr><td>Request By</td><td><?echo $row[0]["acc_manager"];?></td></tr>
-<tr><td>Account Manager</td><td><?echo $row[0]["sales_manager"];?></td></tr>
-<? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["main_user_id"];
-    $rowuser=select_query($sql);
-    ?>
-<tr><td>Client User Name     </td><td><?echo $rowuser[0]["sys_username"];?></td></tr>   
-
-<tr><td>Company Name</td><td><?echo $row[0]["company"];?></td></tr>     
-<tr><td>Total No Of Vehicle</td><td><?echo $row[0]["total_no_of_vehicles"];?></td></tr>     
-<tr><td>Potential</td><td><?echo $row[0]["potential"];?></td></tr> 
-
-
-<tr><td>Google Map</td><td><?echo $row[0]["rs_google_map"];?></td></tr>     
-<tr><td>Admin </td><td><?echo $row[0]["rs_admin"];?></td></tr>    
-<tr><td><tr><td>Type Of Alert</td><td><?echo $row[0]["alert"];?></td></tr> 
-<tr><td>Alert Contact Number</td><td><?echo $row[0]["alert_contact"];?></td></tr>     
-<tr><td><tr><td>Reports</td><td><?echo $row[0]["reports"];?></td></tr> 
-</tbody></table></div>
-<div class="dataright">
-<table cellspacing="2" cellpadding="2"><tbody>
-<tr><td>Client Contact Number </td><td><?echo $row[0]["client_contact_num"];?></td></tr>
-<tr><td>Other Alert/ Info</td><td><?echo $row[0]["rs_others"];?></td></tr>     
-<tr><td>Customize Report </td><td><?echo $row[0]["rs_customize_report"];?></td></tr>    
- <!--<tr><td>Admin Approval</td>  <td><?if($row[0]["approve_status"]==1) echo "Approved"; else echo "Pending Approval"?></td></tr>-->
-<tr><td><strong>Process Pending </strong></td>  <td><strong>
-<?  if($row[0]["software_status"]==2 || (($row[0]["support_comment"]!="" || $row[0]["admin_comment"]!="") && $row[0]["sales_comment"]==""))
-    {echo "Reply Pending at Request Side";}
-    elseif($row[0]["approve_status"]==0 && $row[0]["forward_req_user"]!="" && $row[0]["forward_back_comment"]=="" && $row[0]["software_status"]==1)   
-    {echo "Pending Admin Approval (Req Forward to ".$row[0]["forward_req_user"].")";}
-    elseif($row[0]["approve_status"]==0 && $row[0]["final_status"]==0 && $row[0]["software_status"]==1){echo "Pending Admin Approval";}
-    elseif($row[0]["approve_status"]==1 && $row[0]["software_status"]==1 && $row[0]["final_status"]!=1){echo "Pending at Tech Support Team";}
-    elseif($row[0]["final_status"]==1){echo "Process Done";}?></strong></td></tr>
-
-<tr><td>Account Comment</td>  <td><?echo $row[0]["account_comment"];?></td></tr>
-<tr><td>Sales Comment</td>  <td><?echo $row[0]["sales_comment"];?></td></tr>
-<tr><td>Support Comment</td><td><?echo $row[0]["support_comment"];?></td></tr>
-<tr><td>Admin Comment</td><td><?echo $row[0]["admin_comment"];?></td></tr>
-<tr><td>Req Forwarded to</td><td><?echo $row[0]["forward_req_user"];?></td></tr>
-<tr><td>Forward Comment</td><td><?echo $row[0]["forward_comment"];?></td></tr>
-<tr><td>F/W Request Back Comment</td><td><?echo $row[0]["forward_back_comment"];?></td></tr><tr><td>Approval Date</td><td><?
-if($row[0]["approve_status"]==1 && $row[0]["approve_date"]!='')
-{
-echo date("d-M-Y h:i:s A",strtotime($row[0]["approve_date"]));
-}
-else
-{
-    echo "";
-}
-
-?></td></tr>
-<tr><td>Closed Date</td><td><?
-if($row[0]["final_status"]==1 && $row[0]["close_date"]!='')
-{
-echo date("d-M-Y h:i:s A",strtotime($row[0]["close_date"]));
-}
-else
-{
-    echo "";
-}
-
-?></td>
-    </tr>
-</tbody>
-    </table>
-    </div>
-    </div>
-    <?
-    }
-		
-	else If($tablename=="deactivate_sim")
+    else If($tablename=="deactivate_sim")
         {
           $query = "SELECT * FROM ".$tablename." where id=".$RowId;
             $row=select_query($query);
@@ -5145,13 +4261,17 @@ else
           $query = "SELECT * FROM ".$tablename." where id=".$RowId;
             $row=select_query($query);
     ?>
-   
-    <div id="databox">
-<div class="heading">Stop Gps</div>
-<div class="dataleft"><table cellspacing="2" cellpadding="2">
-    <tbody>
-<tr><td>Date     </td><td><?echo date("d-M-Y h:i:s A",strtotime($row[0]["date"]));?></td></tr>
-<? /*if($row[0]["acc_manager"]=='saleslogin') {
+<div >
+<div id="databox">
+  <div class="heading">Stop Gps</div>
+  <div class="dataleft">
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td>Date </td>
+          <td><?echo $row[0]["date"];?></td>
+        </tr>
+        <? /* if($row[0]["acc_manager"]=='saleslogin') {
 $account_manager=$row[0]["sales_manager"];
 }
 else {
@@ -5159,47 +4279,106 @@ $account_manager=$row[0]["acc_manager"];
 }*/
 
 ?>
-<tr><td>Request By</td><td><?echo $row[0]["acc_manager"];?></td></tr>
-<tr><td>Account Manager</td><td><?echo $row[0]["sales_manager"];?></td></tr>
-<? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["client"];
+        <tr>
+          <td>Request By</td>
+          <td><?echo $row[0]["acc_manager"];?></td>
+        </tr>
+        <tr>
+          <td>Account Manager</td>
+          <td><?echo $row[0]["sales_manager"];?></td>
+        </tr>
+        <? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["client"];
     $rowuser=select_query($sql);
     ?>
-<tr><td>Client User Name     </td><td><?echo $rowuser[0]["sys_username"];?></td></tr>
-<tr><td>Company Name     </td><td><?echo $row[0]["company"];?></td></tr>
-<tr><td>Total No Of Vehicle     </td><td><?echo $row[0]["tot_no_of_vehicle"];?></td></tr>
-<tr><td>Persent Status Of</td><td>:---</td></tr>
-<tr><td>Location     </td><td><?echo $row[0]["ps_of_location"];?></td></tr>
-<tr><td>OwnerShip     </td><td><?echo $row[0]["ps_of_ownership"];?></td></tr>
-<tr><td>Data to Display     </td><td><?echo $row[0]["data_display"];?></td></tr>
-<tr><td>Reason     </td><td><?echo $row[0]["reason"];?></td></tr>
-<tr><td>Vehicle to Stop GPS </td><td><?php $vechile_no = explode(",",$row[0]["reg_no"]);
-for($i=0;$i<=count($vechile_no);$i++){ if($i%3!=0){ echo $vechile_no[$i].", ";}else { echo "<br/>".$vechile_no[$i].", ";} }?></td></tr>
-
-</tbody></table></div>
-
-<div class="dataright">
-<table cellspacing="2" cellpadding="2"><tbody>
- <!--<tr><td>Admin Approval</td>  <td><?if($row[0]["approve_status"]==1) echo "Approved"; else echo "Pending Approval"?></td></tr>-->
-<tr><td><strong>Process Pending </strong></td>  <td><strong>
-<?  if($row[0]["stop_gps_status"]==2 || (($row[0]["support_comment"]!="" || $row[0]["admin_comment"]!="") && $row[0]["sales_comment"]==""))
+        <tr>
+          <td>Client User Name </td>
+          <td><?echo $rowuser[0]["sys_username"];?></td>
+        </tr>
+        <tr>
+          <td>Company Name </td>
+          <td><?echo $row[0]["company"];?></td>
+        </tr>
+        <tr>
+          <td>Total No Of Vehicle </td>
+          <td><?echo $row[0]["tot_no_of_vehicle"];?></td>
+        </tr>
+        <tr>
+          <td>Vehicle to Stop GPS </td>
+          <td><?echo $row[0]["no_of_vehicle"];?></td>
+        </tr>
+        <tr>
+          <td>Persent Status Of</td>
+          <td>:---</td>
+        </tr>
+        <tr>
+          <td>Location </td>
+          <td><?echo $row[0]["ps_of_location"];?></td>
+        </tr>
+        <tr>
+          <td>OwnerShip </td>
+          <td><?echo $row[0]["ps_of_ownership"];?></td>
+        </tr>
+        <tr>
+          <td>Reason </td>
+          <td><?echo $row[0]["reason"];?></td>
+        </tr>
+        <tr>
+          <td colspan="2">-------------------------------------------</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="dataright">
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <!--<tr><td>Admin Approval</td>  <td><?if($row[0]["approve_status"]==1) echo "Approved"; else echo "Pending Approval"?></td></tr>-->
+        <tr>
+          <td><strong>Process Pending </strong></td>
+          <td><strong>
+            <?  if($row[0]["stop_gps_status"]==2 || (($row[0]["support_comment"]!="" || $row[0]["admin_comment"]!="") && $row[0]["sales_comment"]==""))
     {echo "Reply Pending at Request Side";}
     elseif($row[0]["account_comment"]=="" && $row[0]["total_pending"]=="" && $row[0]["approve_status"]==0 && $row[0]["final_status"]==0){echo "Pending at Accounts";}
-    elseif($row[0]["approve_status"]==0 && $row[0]["forward_req_user"]!="" && $row[0]["forward_back_comment"]=="" && $row[0]["stop_gps_status"]==1)   
-    {echo "Pending Admin Approval (Req Forward to ".$row[0]["forward_req_user"].")";}
     elseif($row[0]["approve_status"]==0 && ($row[0]["account_comment"]!="" || $row[0]["total_pending"]!="") && $row[0]["final_status"]==0 && $row[0]["stop_gps_status"]==1)
     {echo "Pending Admin Approval";}
     elseif($row[0]["approve_status"]==1 && $row[0]["stop_gps_status"]==1 && $row[0]["final_status"]!=1){echo "Pending at Tech Support Team";}
-    elseif($row[0]["final_status"]==1){echo "Process Done";}?></strong></td></tr>
-
-<tr><td>Account Comment</td>  <td><?echo $row[0]["account_comment"];?></td></tr>
-<tr><td>Payment Pending</td>  <td><?echo $row[0]["total_pending"];?></td></tr>
-<tr><td>Sales Comment</td>  <td><?echo $row[0]["sales_comment"];?></td></tr>
-<tr><td>Support Comment</td><td><?echo $row[0]["support_comment"];?></td></tr>
-<tr><td>Admin Comment</td><td><?echo $row[0]["admin_comment"];?></td></tr>
-<tr><td>Req Forwarded to</td><td><?echo $row[0]["forward_req_user"];?></td></tr>
-<tr><td>Forward Comment</td><td><?echo $row[0]["forward_comment"];?></td></tr>
-<tr><td>F/W Request Back Comment</td><td><?echo $row[0]["forward_back_comment"];?></td></tr>
-<tr><td>Approval Date</td><td><?
+    elseif($row[0]["final_status"]==1){echo "Process Done";}?>
+            </strong></td>
+        </tr>
+        <tr>
+          <td>Account Comment</td>
+          <td><?echo $row[0]["account_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Payment Pending</td>
+          <td><?echo $row[0]["total_pending"];?></td>
+        </tr>
+        <tr>
+          <td>Sales Comment</td>
+          <td><?echo $row[0]["sales_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Support Comment</td>
+          <td><?echo $row[0]["support_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Admin Comment</td>
+          <td><?echo $row[0]["admin_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Req Forwarded to</td>
+          <td><?echo $row[0]["forward_req_user"];?></td>
+        </tr>
+        <tr>
+          <td>Forward Comment</td>
+          <td><?echo $row[0]["forward_comment"];?></td>
+        </tr>
+        <tr>
+          <td>F/W Request Back Comment</td>
+          <td><?echo $row[0]["forward_back_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Approval Date</td>
+          <td><?
 if($row[0]["approve_status"]==1 && $row[0]["approve_date"]!='')
 {
 echo date("d-M-Y h:i:s A",strtotime($row[0]["approve_date"]));
@@ -5208,9 +4387,11 @@ else
 {
     echo "";
 }
-
-?></td></tr>
-<tr><td>Closed Date</td><td><?
+?></td>
+        </tr>
+        <tr>
+          <td>Closed Date</td>
+          <td><?
 if($row[0]["final_status"]==1 && $row[0]["close_date"]!='')
 {
 echo date("d-M-Y h:i:s A",strtotime($row[0]["close_date"]));
@@ -5221,62 +4402,122 @@ else
 }
 
 ?></td>
-    </tr></tbody>
+        </tr>
+      </tbody>
     </table>
-    </div>
-    </div>
-   
+  </div>
+</div>
 <? }
+
 
     else If($tablename=="start_gps")
         {
           $query = "SELECT * FROM ".$tablename." where id=".$RowId;
             $row=select_query($query);
     ?>
-   
-    <div id="databox">
-<div class="heading">Start Gps</div>
-<div class="dataleft"><table cellspacing="2" cellpadding="2">
-    <tbody>
-<tr><td>Date     </td><td><?echo date("d-M-Y h:i:s A",strtotime($row[0]["date"]));?></td></tr>
-<tr><td>Request By</td><td><?echo $row[0]["acc_manager"];?></td></tr>
-<tr><td>Account Manager</td><td><?echo $row[0]["sales_manager"];?></td></tr>
-<? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["client"];
+<div id="databox">
+  <div class="heading">Start Gps</div>
+  <div class="dataleft">
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td>Date </td>
+          <td><?echo date("d-M-Y h:i:s A",strtotime($row[0]["date"]));?></td>
+        </tr>
+        <tr>
+          <td>Request By</td>
+          <td><?echo $row[0]["acc_manager"];?></td>
+        </tr>
+        <tr>
+          <td>Account Manager</td>
+          <td><?echo $row[0]["sales_manager"];?></td>
+        </tr>
+        <? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["client"];
     $rowuser=select_query($sql);
     ?>
-<tr><td>Client User Name     </td><td><?echo $rowuser[0]["sys_username"];?></td></tr>
-<tr><td>Company Name     </td><td><?echo $row[0]["company"];?></td></tr>
-<tr><td>Total No Of Vehicle     </td><td><?echo $row[0]["tot_no_of_vehicle"];?></td></tr>
-<tr><td>Persent Status Of</td><td>:---</td></tr>
-<tr><td>OwnerShip     </td><td><?echo $row[0]["ps_of_ownership"];?></td></tr>
-<tr><td>Reason     </td><td><?echo $row[0]["reason"];?></td></tr>
-<tr><td>Vehicle to Start GPS </td><td><?php $vechile_no = explode(",",$row[0]["reg_no"]);
-for($i=0;$i<=count($vechile_no);$i++){ if($i%3!=0){ echo $vechile_no[$i].", ";}else { echo "<br/>".$vechile_no[$i].", ";} }?></td></tr>
-
-</tbody></table></div>
-
-<div class="dataright">
-<table cellspacing="2" cellpadding="2"><tbody>
- <!--<tr><td>Admin Approval</td>  <td><?if($row[0]["approve_status"]==1) echo "Approved"; else echo "Pending Approval"?></td></tr>-->
-<tr><td><strong>Process Pending </strong></td>  <td><strong>
-<?  if($row[0]["start_gps_status"]==2 || (($row[0]["support_comment"]!="" || $row[0]["admin_comment"]!="") && $row[0]["sales_comment"]==""))
+        <tr>
+          <td>Client User Name </td>
+          <td><?echo $rowuser[0]["sys_username"];?></td>
+        </tr>
+        <tr>
+          <td>Company Name </td>
+          <td><?echo $row[0]["company"];?></td>
+        </tr>
+        <tr>
+          <td>Total No Of Vehicle </td>
+          <td><?echo $row[0]["tot_no_of_vehicle"];?></td>
+        </tr>
+        <tr>
+          <td>Persent Status Of</td>
+          <td>:---</td>
+        </tr>
+        <tr>
+          <td>OwnerShip </td>
+          <td><?echo $row[0]["ps_of_ownership"];?></td>
+        </tr>
+        <tr>
+          <td>Reason </td>
+          <td><?echo $row[0]["reason"];?></td>
+        </tr>
+        <tr>
+          <td>Vehicle to Start GPS </td>
+          <td><?php $vechile_no = explode(",",$row[0]["reg_no"]);
+for($i=0;$i<=count($vechile_no);$i++){ if($i%3!=0){ echo $vechile_no[$i].", ";}else { echo "<br/>".$vechile_no[$i].", ";} }?></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="dataright">
+    <table cellspacing="2" cellpadding="2">
+      <tbody>
+        <!--<tr><td>Admin Approval</td>  <td><?if($row[0]["approve_status"]==1) echo "Approved"; else echo "Pending Approval"?></td></tr>-->
+        <tr>
+          <td><strong>Process Pending </strong></td>
+          <td><strong>
+            <?  if($row[0]["start_gps_status"]==2 || (($row[0]["support_comment"]!="" || $row[0]["admin_comment"]!="") && $row[0]["sales_comment"]==""))
     {echo "Reply Pending at Request Side";}
     elseif($row[0]["account_comment"]=="" && $row[0]["total_pending"]=="" && $row[0]["approve_status"]==0 && $row[0]["final_status"]==0){echo "Pending at Accounts";}
-    elseif($row[0]["approve_status"]==0 && ($row[0]["account_comment"]!="" || $row[0]["total_pending"]!="") && $row[0]["forward_req_user"]!="" && $row[0]["forward_back_comment"]=="" && $row[0]["start_gps_status"]==1)    {echo "Pending Admin Approval (Req Forward to ".$row[0]["forward_req_user"].")";}
     elseif($row[0]["approve_status"]==0 && ($row[0]["account_comment"]!="" || $row[0]["total_pending"]!="") && $row[0]["final_status"]==0 && $row[0]["start_gps_status"]==1)
     {echo "Pending Admin Approval";}
     elseif($row[0]["approve_status"]==1 && $row[0]["start_gps_status"]==1 && $row[0]["final_status"]!=1){echo "Pending at Tech Support Team";}
-    elseif($row[0]["final_status"]==1){echo "Process Done";}?></strong></td></tr>
-
-<tr><td>Account Comment</td>  <td><?echo $row[0]["account_comment"];?></td></tr>
-<tr><td>Payment Pending</td>  <td><?echo $row[0]["total_pending"];?></td></tr>
-<tr><td>Sales Comment</td>  <td><?echo $row[0]["sales_comment"];?></td></tr>
-<tr><td>Support Comment</td><td><?echo $row[0]["support_comment"];?></td></tr>
-<tr><td>Admin Comment</td><td><?echo $row[0]["admin_comment"];?></td></tr>
-<tr><td>Req Forwarded to</td><td><?echo $row[0]["forward_req_user"];?></td></tr>
-<tr><td>Forward Comment</td><td><?echo $row[0]["forward_comment"];?></td></tr>
-<tr><td>F/W Request Back Comment</td><td><?echo $row[0]["forward_back_comment"];?></td></tr>
-<tr><td>Approval Date</td><td><?
+    elseif($row[0]["final_status"]==1){echo "Process Done";}?>
+            </strong></td>
+        </tr>
+        <tr>
+          <td>Account Comment</td>
+          <td><?echo $row[0]["account_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Payment Pending</td>
+          <td><?echo $row[0]["total_pending"];?></td>
+        </tr>
+        <tr>
+          <td>Sales Comment</td>
+          <td><?echo $row[0]["sales_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Support Comment</td>
+          <td><?echo $row[0]["support_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Admin Comment</td>
+          <td><?echo $row[0]["admin_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Req Forwarded to</td>
+          <td><?echo $row[0]["forward_req_user"];?></td>
+        </tr>
+        <tr>
+          <td>Forward Comment</td>
+          <td><?echo $row[0]["forward_comment"];?></td>
+        </tr>
+        <tr>
+          <td>F/W Request Back Comment</td>
+          <td><?echo $row[0]["forward_back_comment"];?></td>
+        </tr>
+        <tr>
+          <td>Approval Date</td>
+          <td><?
 if($row[0]["approve_status"]==1 && $row[0]["approve_date"]!='')
 {
 echo date("d-M-Y h:i:s A",strtotime($row[0]["approve_date"]));
@@ -5286,8 +4527,11 @@ else
     echo "";
 }
 
-?></td></tr>
-<tr><td>Closed Date</td><td><?
+?></td>
+        </tr>
+        <tr>
+          <td>Closed Date</td>
+          <td><?
 if($row[0]["final_status"]==1 && $row[0]["close_date"]!='')
 {
 echo date("d-M-Y h:i:s A",strtotime($row[0]["close_date"]));
@@ -5298,19 +4542,18 @@ else
 }
 
 ?></td>
-    </tr></tbody>
+        </tr>
+      </tbody>
     </table>
-    </div>
-    </div>
-   
-    <? }
+  </div>
+</div>
+<?
+    }
 
     else If($tablename=="transfer_the_vehicle")
         {
         $query = "SELECT * FROM ".$tablename." where id=".$RowId;
             $row=select_query($query);
-
-
 
     ?>
 <div id="databox">
@@ -5618,7 +4861,6 @@ else
 {
     echo "";
 }
-
 ?></td>
         </tr>
         <tr>

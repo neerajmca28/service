@@ -66,8 +66,9 @@ $row_pending=mysql_fetch_array($sql_pending);
     <link rel="stylesheet" href="http://trackingexperts.com/collection/thickbox/thickbox.css" type="text/css" media="projection, screen" />
 
 	<script type="text/javascript" charset="utf-8">
-        $(document).ready(function() {
-            $('#example').dataTable( {
+		$.noConflict();
+        jQuery(document).ready(function() {
+            jQuery('#example').dataTable( {
 				"iDisplayLength": 50,
                 "aaSorting": [[ 7, "desc" ]]
             } );
