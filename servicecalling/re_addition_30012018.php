@@ -1,3 +1,4 @@
+
 <?php
 include("../connection.php");
 include_once(__DOCUMENT_ROOT.'/include/header.inc.php');
@@ -374,7 +375,7 @@ function deviceStatus(device){
 
   if(document.form1.deviecestatus.value=="")
   {
-  alert("Please Select Device Location") ;
+  alert("Please Select Device Status") ;
   document.form1.imeistatus.focus();
   return false;
   }
@@ -481,18 +482,15 @@ function deviceStatus(device){
       {
         var inputTime = new Date(tilltime).getTime();
         var time=(inputTime/(3600*1000));
-        //alert(time)
         var d = new Date();
         var n = d.getTime();
         var currntTime4=(n/(3600*1000));
-        //alert(currntTime4)
         var diff=time-currntTime4;
-        //alert(diff)
         if(timestatus=="Till")
         {
-          if(diff<=1.99)
+          if(diff<=3.80)
           {
-              alert('Please enter 2 hour difference for available time');
+              alert('Please enter 4 hour difference for available time');
               document.form1.datetimepicker.focus();
               return false;
           }
@@ -524,7 +522,7 @@ function deviceStatus(device){
         var n = d.getTime();       
         var currntTime4=(n/(3600*1000));     
         var diff=time-currntTime4;  
-        alert(diff); 
+        //alert(diff); 
 
         var d1 = new Date(betweentime);
         var d2 = new Date(betweentime2);       
@@ -532,11 +530,11 @@ function deviceStatus(device){
         if(timestatus=="Between")
         {  
           //alert('tt');     
-          if(diff<=1.99)
-          {
-              alert('Please enter 2 hour difference for available time');
-              document.form1.datetimepicker1.focus();
-              return false;
+          if(diff<=3.80)   
+          {  
+              alert('Please enter 4 hour difference for available time');  
+              document.form1.datetimepicker1.focus();   
+              return false;    
           }
           if(d1.getTime() >= d2.getTime()){
 
@@ -874,7 +872,7 @@ ul,li { margin:0; padding:0; list-style:none;}
       <tr>
         <td align="right" nowrap width="100px"> Client User Name:<font color="red">*</font></td>
         <td width="400px">
-          <select style="width:150px;" name="main_user_id" id="main_user_id"  onchange="getCompanyName(this.value,'TxtCompany');getSalesPersonName(this.value,'TxtSalesPersonName');getdeletedImei(this.value,'deletedImei');gettoolkit(this.value,'toolkitAccessory');getRequestClose(this.value,'TxtRequestClose')" >
+          <select style="width:150px;" name="main_user_id" id="main_user_id"  onchange="getCompanyName(this.value,'TxtCompany');getSalesPersonName(this.value,'TxtSalesPersonName');getdeletedImei(this.value,'deletedImei');gettoolkit(this.value,'toolkitAccessory');" >
             <option value="" >-- Select One --</option>
             <?php
 
@@ -926,7 +924,7 @@ ul,li { margin:0; padding:0; list-style:none;}
         </td>
       </tr>
       <tr>        
-        <td align="right" nowrap >Select Device Location<font color="red">*</font></td>
+        <td align="right" nowrap >Select Device Status<font color="red">*</font></td>
         <td>
            <select name="deviecestatus" id="deviecestatus" style="width:150px" onchange="deviceStatus2(this.value)">
             <option value="" selected disabled>Select Device Status</option>
@@ -958,10 +956,6 @@ ul,li { margin:0; padding:0; list-style:none;}
             </tr>
           </table>
         </td>
-      </tr>
-      <tr id="TxtRequestClose" style="display:none">
-          <td>Accessory Selected:<font color="#000">* </font></td>
-          <td id="TxtRequestClose"></td>
       </tr>
       <tr id="toolkitAccessory_td" style="display:none">
           <td>Accessory Selected:<font color="#000">* </font></td>
@@ -1016,10 +1010,7 @@ ul,li { margin:0; padding:0; list-style:none;}
       </tr>
       <tr>
         <td align="right" nowrap> Area:<font color="red">*</font></td>
-        <td>
-         <!--  <input style="width:146px" type="text" name="landmark"  id="location" value="<?=$result['location']?>" minlength="15"/> -->
-         <input id="location" name="landmark" class="controls" type="text" placeholder="Search Location" style="width:146px;">
-        </td>
+        <td><input style="width:146px" type="text" name="landmark"  id="location" value="<?=$result['location']?>" minlength="15"/></td>
       </tr>
       <tr>
         <td align="right" nowrap>Availbale Time status:<font color="red">*</font></td>
@@ -1055,17 +1046,17 @@ ul,li { margin:0; padding:0; list-style:none;}
           <table cellspacing="0" cellpadding="0">
             <tr>
               <td>
-                  <INPUT type="button" value="+" id='addRowss' />
+                  <INPUT type="button" value="+" id='addRowss' onClick="addRow('dataTable')" />
               </td>
               <td>
-                  <INPUT type="button" value="-" id='delRowss' />
+                  <INPUT type="button" value="-" id='delRowss' onClick="deleteRow('dataTable')" />
               </td>
             </tr>
           </table>
           <table id="dataTable"  cellspacing="" cellpadding="">
            <tr>
               <td  height="32" align="right">
-                <select name="designation" id="designation">
+                <select name="designation" id="designation" onchange="designationChange(this.value)">
                   <option value="" disabled selected>-- Select Designation --</option>
                   <option value="driver" >Driver</option>
                   <option value="supervisor" >Supervisor</option>
@@ -1085,7 +1076,7 @@ ul,li { margin:0; padding:0; list-style:none;}
            </tr>
            <tr id="dataDesignation" style="display:none">
               <td  height="32" align="right">
-                <select name="designation2" id="designation2" style="margin-left:-4px" >
+                <select name="designation2" id="designation2" style="margin-left:-4px" onchange="designationChange(this.value)">
                   <option value="" disabled selected>-- Select Designation --</option>
                   <option value="driver" >Driver</option>
                   <option value="supervisor" >Supervisor</option>
@@ -1138,7 +1129,7 @@ ul,li { margin:0; padding:0; list-style:none;}
                 </select>
               </td>
               <td>
-                <select name="actype" id="actype" style="width:150px;display:none">
+                <select name="actype" id="actype" style="width:150px;display:none" onchange="checkbox_lease();" >
                   <option value="" disabled  selected>Select AC Category</option>
                   <option value="AC" <?php if($result[0]['actype']=='AC') {?> selected="selected" <?php } ?>>AC</option>
                   <option value="NonAC" <?php if($result[0]['actype']=='NonAC') {?> selected="selected" <?php } ?>>Non-AC</option>
@@ -1372,10 +1363,8 @@ $jq(document).ready(function(){
               var isNull = JSON.stringify(msg).indexOf("null")
               
               if(isNull < 0){
-
-               var deviceImei=''; 
                 
-               deviceImei = JSON.parse(msg);
+               var deviceImei = JSON.parse(msg)
                var imeiNumber = [];
               
                for(var i=0;i<deviceImei.length;i++){
@@ -1383,13 +1372,6 @@ $jq(document).ready(function(){
                 imeiNumber.push(deviceImei[i].device_imei)
                       
                }
-
-               var options = "<option>Select Installation</option>";
-                for(var y=1; y<=deviceImei.length; y++){
-                  options += "<option>"+ y +"</option>";
-                }
-
-              document.getElementById("no_of_installation").innerHTML = options;
                if(d_status == 1)
                {
                  $jq('#no_of_installation').prop('disabled', false);
@@ -1551,6 +1533,7 @@ function getdeletedImei(RowId,DivId)
   
 
 
+
 function selectAllAccessory(source) {
     var checkboxes = document.getElementsByName('toolkit[]');
     for(var i in checkboxes)
@@ -1566,7 +1549,6 @@ $jq.ajax({
     url:"userInfo.php?action=toolsAccessories",
     //data:"category="+category+"&expairy="+expairy1+"&duration="+durationlist+"&sortby="+sortby+"&price="+price+"&search="+search1,
     data:"user_id="+user_id,
-    dataType: "json",
      beforeSend: function(msg){
         $jq("#button1").prop('disabled', true);
       },
@@ -1615,8 +1597,7 @@ $jq('#datetimepicker').datetimepicker({
     'closeOnDateSelect' : true,
     'interval': 15,
     'validateOnBlur' : true,
-    'minDateTime': new Date(),
-    'step':30
+    'minDateTime': new Date()
 });
 $jq('#datetimepicker1').datetimepicker({
     'format': 'Y-m-d H:i',
@@ -1624,8 +1605,7 @@ $jq('#datetimepicker1').datetimepicker({
     'closeOnDateSelect' : true,
     'interval': 15,
     'validateOnBlur' : true,
-    'minDateTime': new Date(),
-    'step':30
+    'minDateTime': new Date()
 });
 
 $jq('#datetimepicker2').datetimepicker({
@@ -1634,8 +1614,7 @@ $jq('#datetimepicker2').datetimepicker({
     'closeOnDateSelect' : true,
     'interval': 15,
     'validateOnBlur' : true,
-    'minDateTime': new Date(),
-    'step':30
+    'minDateTime': new Date()
 });
 
      $jq('.checkbox1').on('change', function() {
@@ -1652,21 +1631,6 @@ $jq('#datetimepicker2').datetimepicker({
      
     </script>
 <script>StatusBranch12("<?=$result['branch_type'];?>");TillBetweenTime12("<?=$result['atime_status'];?>");</script>
-<script>
-     
-
-      function initAutocomplete() {
-        
-        var input = document.getElementById('location');
-        var searchBox = new google.maps.places.SearchBox(input);
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-       
-      }
-
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOmB0NUl8HigD3XItbC6Pn-pJdNtJRdLw&libraries=places&callback=initAutocomplete"
-         async defer></script>
 
 <?
 include("../include/footer.php");

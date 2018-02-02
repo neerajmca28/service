@@ -208,7 +208,7 @@ while($row=mysql_fetch_array($rs))
         <?php //if($row["approve_status"]!=1){?>
            <!-- <a href="add_installation.php?id=<?=$row['id'];?>&action=edit">Edit</a>-->
          <?php if($row["installation_status"]!= 2 ) {?>
-             <a href="update_installation.php?id=<?=$row['id'];?>&action=edit">Edit</a>
+             <a href="update_reinstallation.php?id=<?=$row['id'];?>&action=edit">Edit</a>
           <?php }?>
          </td>
         <?}?>

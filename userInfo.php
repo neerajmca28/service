@@ -19,7 +19,16 @@ $veh_reg=$_GET["veh_reg"];
 $row_id=$_GET["row_id"];
 $comment=$_GET["comment"];
 
+if(isset($_GET['action']) && $_GET['action']=='getRequestCloseStatus')
+{ 
+  echo $currentDate=date('Y-m-d');die;
 
+  $select=select_query("select req_date,installation_status from installation_request where user_id='".$q."' and req_date='".date(Y-m-d)."' ");
+  
+ 
+
+   
+}
 
 if(isset($_GET['action']) && $_GET['action']=='toolsAccessories')
 {

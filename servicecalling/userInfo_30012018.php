@@ -2,375 +2,13 @@
 error_reporting(0);
 ob_start();
 session_start();
-include("../connection.php");
-include_once(__DOCUMENT_ROOT.'/private/master.php');
-
+include($_SERVER["DOCUMENT_ROOT"]."/service/connection.php");
 
 $q=$_GET["user_id"];
 $inst_id=$_GET["inst_id"];
 $veh_reg=$_GET["veh_reg"];
 $row_id=$_GET["row_id"];
 $comment=$_GET["comment"];
-
-$result="select services.id as id,services.id,veh_reg,adddate(latest_telemetry.gps_time,INTERVAL 19800 second) as lastcontact,round(gps_speed*1.609,0) as speed,  case when tel_ignition=true then true else false end as aconoff , geo_street as street, latest_telemetry.gps_latitude as lat,latest_telemetry.gps_longitude as lng ,devices.imei from matrix.services
-
-join matrix.latest_telemetry on latest_telemetry.sys_service_id=services.id
-
-join matrix.devices on devices.id=services.sys_device_id
-
-join matrix.mobile_simcards on matrix.mobile_simcards.id=devices.sys_simcard
-
-where services.id in
-
-(select distinct sys_service_id from matrix.group_services where active=true and sys_group_id in (
-
-select sys_group_id from matrix.group_users where sys_user_id=(".$q.")))";
-
-                                                               
-$data=select_query_live_con($result);
- 
-
-
-if(isset($_GET['action']) && $_GET['action']=='getdata')
-{
- 
-//$result = mysql_query("SELECT veh_reg FROM vehicles WHERE user_id = '".$q."'");
-
-$msg= "<table border='0' style='width:50%;'><tr>";
-//$i=0;
-//while($row = mysql_fetch_array($data))
-for($k=0;$k<count($data);$k++) 
-  {
-    if($k%3==0) {
-    $msg .="</tr><tr>";
-    }
-  $msg .="<td>".$data[$k]['veh_reg']."</td><td><input type='checkbox' name='$k' value='".$data[$k]['veh_reg']."' style='width=20px;'/></td>" ;
-  }
- 
- 
-  $msg .="</tr></table>";
- 
-  echo $msg;
-}
-
-
-if(isset($_GET['action']) && $_GET['action']=='getdataddl')
-{
- 
-  $result2="select services.id as id,services.id,veh_reg from matrix.services
- 
-where services.id in
-
-(select distinct sys_service_id from matrix.group_services where active=true and sys_group_id in (
-
-select sys_group_id from matrix.group_users where sys_user_id=(".$q.")))";
-                                                               
-$data2=select_query_live_con($result2);
-//$result = mysql_query("SELECT veh_reg FROM vehicles WHERE user_id = '".$q."'");ShowDeviceInfo(this.value);
-
-$msg=' <select name="veh_reg" id="<?=$select_id?>" onchange="getdeviceImei(this.value,\'TxtDeviceIMEI\');getInstaltiondate(this.value,\'date_of_install\');getdevicemobile(this.value,\'Devicemobile\');">
-<option value="0">Select Vehicle No</option>';
-//$i=0;
-//while($row = mysql_fetch_array($data))
-for($k=0;$k<count($data2);$k++)
-  {
-    if($k%3==0) {
-    $msg .="</tr><tr>";
-    }
-  $msg .="<option value=".$data2[$k]['veh_reg'].">".$data2[$k]['veh_reg']."</option>";
- 
-  }
- 
- 
-  $msg .="</select>";
- 
-  echo $msg;
-}
-
-
-if(isset($_GET['action']) && $_GET['action']=='serviceProcess')
-{
-  $Updateapprovestatus="update internalsoftware.services_third_party set read_unread_status='1' where id=".$row_id;
-  select_query($Updateapprovestatus);
-  echo "Successfully Process";
-}
-
-if(isset($_GET['action']) && $_GET['action']=='serviceClose')
-{
-  $Updateapprovestatus="update internalsoftware.services_third_party set service_status='6' where id=".$row_id;
-  select_query($Updateapprovestatus);
-  echo "Successfully Process";
-}
-
-if(isset($_GET['action']) && $_GET['action']=='InstallationbackComment')
-{
-
-    $query = "SELECT sales_comment FROM installation_request  where id=".$row_id;
-     $row=select_query($query);
-
-     $Updateapprovestatus="update installation_request set sales_comment='".$row[0]["sales_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."',installation_status='8' where id=".$row_id;
-     mysql_query($Updateapprovestatus);
-}
-
-if(isset($_GET['action']) && $_GET['action']=='InstallationClosed')
-{
-    $Updateapprovestatus="update installation set inst_close_reason='".date("Y-m-d H:i:s")." - ".$comment."',installation_status='5' where id=".$row_id;
-    mysql_query($Updateapprovestatus);
-}
-
-
-/*if(isset($_GET['action']) && $_GET['action']=='InstallationConfirm')
-{
-    $Updateapprovestatus="update installation set installation_status=1 where id=".$row_id;
-    mysql_query($Updateapprovestatus);
-   
-}*/
-
-if(isset($_GET['action']) && $_GET['action']=='InstallationConfirm')
-{
-           
-    // $Updateapprovestatus="update installation_request set installation_status=1 where id=".$row_id;
-    // mysql_query($Updateapprovestatus);
-    $Update_service = array('installation_status'=>1);
-    $condition1 = array('id' => $row_id);
-    update_query($internalsoftware.'.installation_request', $Update_service,$condition1);
-   
-}
-
-
-if(isset($_GET['action']) && $_GET['action']=='total')
-    {
-         
-        echo mysql_num_rows($data);
-    }
-
-if(isset($_GET['action']) && $_GET['action']=='companyname')
-    {
-         
-        $sql="select `group`.name as company from matrix.group_users left join matrix.`group` on group_users.sys_group_id=`group`.id where group_users.sys_user_id=".$q;
-
-        $row=select_query_live_con($sql);
-
-        echo $row[0]["company"];
-    }
-
-
-if(isset($_GET['action']) && $_GET['action']=='creationdate')
-    {
-         
-        $sql="select * from matrix.users where id=".$q;
-
-        $row=select_query_live_con($sql);
-
-        echo date("d-M-Y",strtotime($row[0]["sys_added_date"]));
-    }
-   
-   
-    if(isset($_GET['action']) && $_GET['action']=='creationdate')
-    {
-         
-        $sql="select * from matrix.users where id=".$q;
-
-        $row=select_query_live_con($sql);
-
-        echo date("d-M-Y",strtotime($row[0]["sys_added_date"]));
-    }
-
-
-
-if(isset($_GET['action']) && $_GET['action']=='deviceImei')
-    {
-     
-    $sql1="select imei from matrix.devices where id in (select sys_device_id from matrix.services where veh_reg='".$veh_reg."') limit 1";
-    $row=select_query_live_con($sql1);
-     
- echo $row[0]["imei"];
-    }
-   
-   
-if(isset($_GET['action']) && $_GET['action']=='deviceMobile')
-    {
-         
-    $sql1="select mobile_no from matrix.mobile_simcards where id in ( select sys_simcard from matrix.devices where id in (select sys_device_id from matrix.services where veh_reg='".$veh_reg."'))";
-    $row=select_query_live_con($sql1);
-     
-     echo $row[0]["mobile_no"];
-    }
-
-if(isset($_GET['action']) && $_GET['action']=='clientExtension')
-{
-    $Updateapprovestatus="update add_client_information set final_status=1,close_date='".date("Y-m-d H:i:s")."', 
- req_close_by='".$_SESSION['username']."' where id=".$row_id;
-    select_query($Updateapprovestatus);
-   
-}
-
-if(isset($_GET['action']) && $_GET['action']=='clientExtensionDelete')
-{
-    $Updateapprovestatus="DELETE FROM internalsoftware.add_client_information WHERE  `id`=".$row_id;
-    select_query($Updateapprovestatus);
-   
-}
-
-
-if(isset($_GET['action']) && $_GET['action']=='Instaltiondate')
-    {
-         
-        $sql="select sys_created from matrix.services where veh_reg='".$veh_reg."' limit 1";
- 
-        $row=select_query_live_con($sql);
-
-        echo date("d-M-Y",strtotime($row[0]["sys_created"]));
-    }
-   
-if(isset($_GET['action']) && $_GET['action']=='vehiclecloseComment')
-{
-   
-    $Updateapprovestatus="update vehicle_no_change set close_comment='".date("Y-m-d H:i:s")." - " .$comment."',final_status=1,close_date='".date("Y-m-d H:i:s")."' where id=".$row_id;
-   
-    select_query($Updateapprovestatus);
-}
-
-if(isset($_GET['action']) && $_GET['action']=='vehiclenochangebackComment')
-{
-   
-        $query = "SELECT forward_back_comment FROM vehicle_no_change  where id=".$row_id;
-     $row=select_query($query);
-
-     
-    $Updateapprovestatus="update vehicle_no_change set forward_back_comment='".$row[0]["forward_back_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."' where id=".$row_id;
-   
-    if(select_query($Updateapprovestatus))
-    echo "Comment added Successfully";
-}
-
-if(isset($_GET['action']) && $_GET['action']=='vehicleserviceComment')
-{
-   
-     $query = "SELECT service_comment FROM vehicle_no_change  where id=".$row_id;
-     $row=select_query($query);
-
-    $Updateapprovestatus="update vehicle_no_change set service_comment='".$row[0]["service_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."', vehicle_status='1' where id=".$row_id;
-   
-    if(select_query($Updateapprovestatus))
-    echo "Comment added Successfully";
-}
-
-if(isset($_GET['action']) && $_GET['action']=='ReactivateUserAccount')
-{
-   
-        $query = "SELECT * FROM deactivation_of_account  where id=".$row_id;
-       $row=select_query($query);
-       $reason = str_replace("'","",$row[0]["reason"]);
-       
-        $Updateapprovestatus="update deactivation_of_account set reactivate_status='Y',ractivate_date='".date("Y-m-d H:i:s")."' where id=".$row_id;
-        select_query($Updateapprovestatus);
-       
-        $ractivate_query="INSERT INTO `reactivation_of_account` (`date`, `acc_manager`,`sales_manager`, `company`, `user_id`, `total_no_of_vehicles`,`reactivate_account_status`,`deactivate_temp`,`deact_reason`,`reason`,`deact_req_date`,`deact_close_date`)
-        VALUES ('".date("Y-m-d H:i:s")."','".$row[0]["acc_manager"]."','".$row[0]["sales_manager"]."','".$row[0]["company"]."','".$row[0]["user_id"]."','".$row[0]["total_no_of_vehicles"]."','Y','".$row[0]["deactivate_temp"]."','".$reason."','".$comment."','".$row[0]["date"]."','".$row[0]["close_date"]."')";
-       
-        select_query($ractivate_query);
-     
-}
-
-if(isset($_GET['action']) && $_GET['action']=='deactivateaccountbackComment')
-{
-   
-     $query = "SELECT forward_back_comment FROM deactivation_of_account  where id=".$row_id;
-     $row=select_query($query);
-
-     
-    $Updateapprovestatus="update deactivation_of_account set forward_back_comment='".$row[0]["forward_back_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."' where id=".$row_id;
-      
-    if(select_query($Updateapprovestatus))
-    echo "Comment added Successfully";
-}
-
-if(isset($_GET['action']) && $_GET['action']=='reactivateaccountbackComment')
-{
-   
-     $query = "SELECT forward_back_comment FROM reactivation_of_account  where id=".$row_id;
-     $row=select_query($query);
-
-     
-    $Updateapprovestatus="update reactivation_of_account set forward_back_comment='".$row[0]["forward_back_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."' where id=".$row_id;
-   
-    if(select_query($Updateapprovestatus))
-    echo "Comment added Successfully";
-}
-
-if(isset($_GET['action']) && $_GET['action']=='stopgpsbackComment')
-{
-   
-     $query = "SELECT forward_back_comment FROM stop_gps  where id=".$row_id;
-     $row=select_query($query);
-
-     
-    $Updateapprovestatus="update stop_gps set forward_back_comment='".$row[0]["forward_back_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."' where id=".$row_id;
-   
-   
-    if(select_query($Updateapprovestatus))
-    echo "Comment added Successfully";
-}
-
-if(isset($_GET['action']) && $_GET['action']=='startgpsbackComment')
-{
-   
-  $query = "SELECT forward_back_comment FROM start_gps  where id=".$row_id;
-  $row=select_query($query);
-  
-  
-  $Updateapprovestatus="update start_gps set forward_back_comment='".$row[0]["forward_back_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."' where id=".$row_id;
-  
-  
-  if(select_query($Updateapprovestatus))
-  echo "Comment added Successfully";
-}
-
-if(isset($_GET['action']) && $_GET['action']=='softwarerequestbackComment')
-{
-   
-  $query = "SELECT forward_back_comment FROM software_request  where id=".$row_id;
-  $row=select_query($query);
-  
-  
-  $Updateapprovestatus="update software_request set forward_back_comment='".$row[0]["forward_back_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."' where id=".$row_id;
-  
-  
-  //$Updateapprovestatus="update stop_gps set admin_comment='".$comment."' where id=".$row_id;
-  if(select_query($Updateapprovestatus))
-  echo "Comment added Successfully";
-}
-
-if(isset($_GET['action']) && $_GET['action']=='subusercreationbackComment')
-{
-   
-  $query = "SELECT forward_back_comment FROM sub_user_creation  where id=".$row_id;
-  $row=select_query($query);
-  
-  
-  $Updateapprovestatus="update sub_user_creation set forward_back_comment='".$row[0]["forward_back_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."' where id=".$row_id;
-  
-  
-  //$Updateapprovestatus="update stop_gps set admin_comment='".$comment."' where id=".$row_id;
-  if(select_query($Updateapprovestatus))
-  echo "Comment added Successfully";
-}
-
-if(isset($_GET['action']) && $_GET['action']=='transferthevehiclebackComment')
-{
-   
-  $query = "SELECT forward_back_comment FROM transfer_the_vehicle  where id=".$row_id;
-  $row=select_query($query);
-  
-  
-  $Updateapprovestatus="update transfer_the_vehicle set forward_back_comment='".$row[0]["forward_back_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."' where id=".$row_id;
-  
-  
-  //$Updateapprovestatus="update stop_gps set admin_comment='".$comment."' where id=".$row_id;
-  if(select_query($Updateapprovestatus))
-  echo "Comment added Successfully";
-}
 
 ########### ReAddition #############
 
@@ -529,12 +167,383 @@ if(isset($_GET['action']) && $_GET['action']=='imeistatus')
       }
   }
 
+// if(isset($_GET['action']) && $_GET['action']=='toolsAccessories')
+// {
+
+//   $toolName=array();
+
+//   //print_r($toolName);
+// //echo "select accessories_tollkit from new_account_creation where user_id=".$q; die;
+//   $sql=select_query("select accessories_tollkit from new_account_creation where user_id=".$q);
+// if(count($sql)>0)
+//   {
+//   $toolkitId = explode("#",$sql[0]['accessories_tollkit']);
+
+//   for($i=0;$i<=count($toolkitId)-1;$i++){
+
+//     $sqlToolsName=select_query("select * from toolkit_access where id='".$toolkitId[$i]."'");
+
+//       $data = array(
+
+//         "item_id"=>$sqlToolsName[0]['id'],
+//         "item_name"=>$sqlToolsName[0]['items']
+
+//       );
+
+//       array_push($toolName,$data);
+
+//     }
+//     echo json_encode($toolName);
+//   }
+//   else
+//   {
+//     echo '0';
+//   }
+
+
+
+// }
+
+// if(isset($_GET['action']) && $_GET['action']=='deviceName')
+// {
+//     $userId=$_GET["user_id"];
+
+//     // $sql2="SELECT dtype.id as dev_type_id,dtype.device_type as deviceType FROM new_account_model_master as newmodel LEFT JOIN device_type as dtype ON newmodel.device_type=dtype.id WHERE new_account_reqid='".$userId."'";
+//     // //echo $sql2; die;
+//     // $row2=select_query($sql2);
+//     // echo json_encode($row2);
+
+//     $select=select_query("select id from $internalsoftware.new_account_creation where user_id='".$userId."' ");
+//     $acc_req_id=$select[0]['id'];
+
+//     //  $select=select_query("select new_account_reqid from $internalsoftware.new_account_model_master where user_id='".$userId."' ");
+//     // $acc_req_id=$select[0]['id'];
+
+//   $sql2="SELECT distinct dtype.item_id as dev_type_id,dtype.item_name as deviceType FROM new_account_model_master as newmodel LEFT JOIN item_master as dtype ON newmodel.device_type=dtype.item_id WHERE new_account_reqid='".$acc_req_id."'";
+//     //echo $sql2; die;
+//     $row2=select_query($sql2);
+//     echo '<pre>'; print_r($row2);die;
+//     echo json_encode($row2);
+// }
+
+// if(isset($_GET['action']) && $_GET['action']=='modelname')
+// {
+//     $dev_type_id=$_GET["dev_type"];
+//     $userId1=$_GET["user_id"];
+
+//     $select=select_query("select id from $internalsoftware.new_account_creation where user_id='".$userId1."' ");
+//     $acc_req_id=$select[0]['id'];
+//     // $sql2="SELECT dm.id as model_id,dm.device_model as model_name from new_account_model_master as newmodel inner join device_model as dm  ON newmodel.device_model=dm.id WHERE newmodel.new_account_reqid='".$userId1."' and dm.parent_id='".$dev_type_id."'" ;
+//     // //echo $sql2; die;
+//     // $row2=select_query($sql2);
+//     // echo json_encode($row2);
+
+//       $sql2="SELECT dm.item_id as model_id,dm.item_name as model_name from new_account_model_master as newmodel inner join item_master as dm  ON newmodel.device_model=dm.item_id WHERE newmodel.new_account_reqid='".$acc_req_id."' and dm.parent_id='".$dev_type_id."'" ;
+//     //echo $sql2; die;
+//     $row2=select_query($sql2);
+//     echo json_encode($row2);
+// }
+
 ################################################# 
 
-
-
-if(isset($_GET['action']) && $_GET['action']=='getrowSales')
+if(isset($_GET['action']) && $_GET['action']=='toolsAccessories')
 {
+
+  $toolName=array();
+
+  //print_r($toolName);
+//echo "select accessories_tollkit from new_account_creation where user_id=".$q; die;
+  $sql=select_query("select accessories_tollkit from new_account_creation where user_id=".$q);
+if(count($sql)>0)
+  {
+  $toolkitId = explode("#",$sql[0]['accessories_tollkit']);
+
+  for($i=0;$i<=count($toolkitId)-1;$i++){
+
+    $sqlToolsName=select_query("select * from toolkit_access where id='".$toolkitId[$i]."'");
+  
+      $data = array(
+
+        "item_id"=>$sqlToolsName[0]['id'],
+        "item_name"=>$sqlToolsName[0]['items']
+
+      );
+
+      array_push($toolName,$data);
+
+    }
+    echo json_encode($toolName);
+  }
+  else
+  {
+    echo '0';
+  }
+
+  
+
+}
+
+if(isset($_GET['action']) && $_GET['action']=='deviceName')
+{ 
+    $userId=$_GET["user_id"];
+ 
+    // $sql2="SELECT dtype.id as dev_type_id,dtype.device_type as deviceType FROM new_account_model_master as newmodel LEFT JOIN device_type as dtype ON newmodel.device_type=dtype.id WHERE new_account_reqid='".$userId."'"; 
+    // //echo $sql2; die;
+    // $row2=select_query($sql2);  
+    // echo json_encode($row2);
+
+    $select=select_query("select id from $internalsoftware.new_account_creation where user_id='".$userId."' ");
+    $acc_req_id=$select[0]['id'];
+
+    //  $select=select_query("select new_account_reqid from $internalsoftware.new_account_model_master where user_id='".$userId."' ");
+    // $acc_req_id=$select[0]['id'];
+
+  $sql2="SELECT distinct dtype.item_id as dev_type_id,dtype.item_name as deviceType FROM new_account_model_master as newmodel LEFT JOIN item_master as dtype ON newmodel.device_type=dtype.item_id WHERE new_account_reqid='".$acc_req_id."'"; 
+    //echo $sql2; die;
+    $row2=select_query($sql2);  
+    echo json_encode($row2);
+}
+
+if(isset($_GET['action']) && $_GET['action']=='modelname')
+{ 
+    $dev_type_id=$_GET["dev_type"];
+    $userId1=$_GET["user_id"]; 
+
+    $select=select_query("select id from $internalsoftware.new_account_creation where user_id='".$userId1."' ");
+    $acc_req_id=$select[0]['id'];
+    // $sql2="SELECT dm.id as model_id,dm.device_model as model_name from new_account_model_master as newmodel inner join device_model as dm  ON newmodel.device_model=dm.id WHERE newmodel.new_account_reqid='".$userId1."' and dm.parent_id='".$dev_type_id."'" ;
+    // //echo $sql2; die;
+    // $row2=select_query($sql2);  
+    // echo json_encode($row2);
+
+      $sql2="SELECT dm.item_id as model_id,dm.item_name as model_name from new_account_model_master as newmodel inner join item_master as dm  ON newmodel.device_model=dm.item_id WHERE newmodel.new_account_reqid='".$acc_req_id."' and dm.parent_id='".$dev_type_id."'" ;
+    //echo $sql2; die;
+    $row2=select_query($sql2);  
+    echo json_encode($row2);
+}
+
+#################################################
+
+$result="select services.id as id,services.id,veh_reg,adddate(latest_telemetry.gps_time,INTERVAL 19800 second) as lastcontact,round(gps_speed*1.609,0) as speed,  case when tel_ignition=true then true else false end as aconoff , geo_street as street, latest_telemetry.gps_latitude as lat,latest_telemetry.gps_longitude as lng ,devices.imei from matrix.services
+
+join matrix.latest_telemetry on latest_telemetry.sys_service_id=services.id
+
+join matrix.devices on devices.id=services.sys_device_id
+
+join matrix.mobile_simcards on matrix.mobile_simcards.id=devices.sys_simcard
+
+where services.id in
+
+(select distinct sys_service_id from matrix.group_services where active=true and sys_group_id in (
+
+select sys_group_id from matrix.group_users where sys_user_id=(".$q.")))";
+
+                                                               
+$data=select_query_live_con($result);
+ 
+
+
+if(isset($_GET['action']) && $_GET['action']=='getdata')
+{
+ 
+//$result = mysql_query("SELECT veh_reg FROM vehicles WHERE user_id = '".$q."'");
+
+$msg= "<table border='0' style='width:50%;'><tr>";
+//$i=0;
+//while($row = mysql_fetch_array($data))
+for($k=0;$k<count($data);$k++) 
+  {
+    if($k%3==0) {
+    $msg .="</tr><tr>";
+    }
+  $msg .="<td>".$data[$k]['veh_reg']."</td><td><input type='checkbox' name='$k' value='".$data[$k]['veh_reg']."' style='width=20px;'/></td>" ;
+  }
+ 
+ 
+  $msg .="</tr></table>";
+ 
+  echo $msg;
+}
+
+
+if(isset($_GET['action']) && $_GET['action']=='getdataddl')
+{
+ 
+  $result2="select services.id as id,services.id,veh_reg from matrix.services
+ 
+where services.id in
+
+(select distinct sys_service_id from matrix.group_services where active=true and sys_group_id in (
+
+select sys_group_id from matrix.group_users where sys_user_id=(".$q.")))";
+                                                               
+$data2=select_query_live_con($result2);
+//$result = mysql_query("SELECT veh_reg FROM vehicles WHERE user_id = '".$q."'");ShowDeviceInfo(this.value);
+
+$msg=' <select name="veh_reg" id="<?=$select_id?>" onchange="getdeviceImei(this.value,\'TxtDeviceIMEI\');getInstaltiondate(this.value,\'date_of_install\');getdevicemobile(this.value,\'Devicemobile\');">
+<option value="0">Select Vehicle No</option>';
+//$i=0;
+//while($row = mysql_fetch_array($data))
+for($k=0;$k<count($data2);$k++)
+  {
+    if($k%3==0) {
+    $msg .="</tr><tr>";
+    }
+  $msg .="<option value=".$data2[$k]['veh_reg'].">".$data2[$k]['veh_reg']."</option>";
+ 
+  }
+ 
+ 
+  $msg .="</select>";
+ 
+  echo $msg;
+}
+
+ 
+if(isset($_GET['action']) && $_GET['action']=='InstallationbackComment')
+{
+
+    $query = "SELECT sales_comment FROM installation_request  where id=".$row_id;
+     $row=select_query($query);
+
+     $Updateapprovestatus="update installation_request set sales_comment='".$row[0]["sales_comment"]."<br/>".date("Y-m-d H:i:s")." - " .$comment."',installation_status='8' where id=".$row_id;
+     mysql_query($Updateapprovestatus);
+}
+
+if(isset($_GET['action']) && $_GET['action']=='InstallationClosed')
+{
+    $Updateapprovestatus="update installation set inst_close_reason='".date("Y-m-d H:i:s")." - ".$comment."',installation_status='5' where id=".$row_id;
+    mysql_query($Updateapprovestatus);
+}
+
+
+/*if(isset($_GET['action']) && $_GET['action']=='InstallationConfirm')
+{
+    $Updateapprovestatus="update installation set installation_status=1 where id=".$row_id;
+    mysql_query($Updateapprovestatus);
+   
+}*/
+
+if(isset($_GET['action']) && $_GET['action']=='InstallationConfirm')
+{
+     $query = "SELECT * FROM installation_request  where id=".$row_id;
+     $row=select_query($query);
+     $approve_inst = $row[0]["installation_approve"];
+     $time_status = $row[0]["atime_status"];
+   
+    for($N=1;$N<=$approve_inst;$N++)
+    {       
+        if($time_status == "Till")
+        {
+           
+            $installation = "INSERT INTO installation(`inst_req_id`, `req_date`, `request_by`,sales_person,`user_id`, `company_name`, no_of_vehicals, location,model,time, contact_number,installed_date, status, contact_person, dimts,demo, veh_type,comment, immobilizer_type, payment_req,required, IP_Box,branch_id,installation_status, Zone_area,atime_status,`inter_branch`, branch_type, instal_reinstall, approve_status, installation_approve, approve_date, fuel_sensor, bonnet_sensor, rfid_reader, speed_alarm, door_lock_unlock, temperature_sensor, duty_box, panic_button) VALUES('".$row[0]["id"]."','".$row[0]["req_date"]."','".$row[0]["request_by"]."','".$row[0]["sales_person"]."', '".$row[0]["user_id"]."', '".$row[0]["company_name"]."','1','".$row[0]["location"]."','".$row[0]["model"]."','".$row[0]["time"]."','".$row[0]["contact_number"]."','".$row[0]["installed_date"]."',1,'".$row[0]["contact_person"]."','".$row[0]["dimts"]."','".$row[0]["demo"]."','".$row[0]["veh_type"]."','".$row[0]["comment"]."','".$row[0]["immobilizer_type"]."','".$row[0]["payment_req"]."','".$row[0]["required"]."','".$row[0]["IP_Box"]."','".$row[0]["branch_id"]."','1','".$row[0]["Zone_area"]."','".$row[0]["atime_status"]."','".$row[0]["inter_branch"]."','".$row[0]["branch_type"]."','".$row[0]["instal_reinstall"]."','".$row[0]["approve_status"]."','1','".$row[0]["approve_date"]."','".$row[0]["fuel_sensor"]."','".$row[0]["bonnet_sensor"]."','".$row[0]["rfid_reader"]."','".$row[0]["speed_alarm"]."','".$row[0]["door_lock_unlock"]."','".$row[0]["temperature_sensor"]."','".$row[0]["duty_box"]."','".$row[0]["panic_button"]."')";
+               
+            $execute_inst=mysql_query($installation);
+        }
+       
+        if($time_status == "Between")
+        {
+            $installation = "INSERT INTO installation(`inst_req_id`, `req_date`, `request_by`,sales_person,`user_id`, `company_name`, no_of_vehicals, location,model,time,totime, contact_number,installed_date, status, contact_person, dimts,demo, veh_type,comment, immobilizer_type, payment_req,required, IP_Box,branch_id,installation_status, Zone_area,atime_status,`inter_branch`, branch_type, instal_reinstall, approve_status, installation_approve, approve_date, fuel_sensor, bonnet_sensor, rfid_reader, speed_alarm, door_lock_unlock, temperature_sensor, duty_box, panic_button) VALUES('".$row[0]["id"]."','".$row[0]["req_date"]."','".$row[0]["request_by"]."','".$row[0]["sales_person"]."', '".$row[0]["user_id"]."', '".$row[0]["company_name"]."','1','".$row[0]["location"]."','".$row[0]["model"]."','".$row[0]["time"]."','".$row[0]["totime"]."','".$row[0]["contact_number"]."','".$row[0]["installed_date"]."',1,'".$row[0]["contact_person"]."','".$row[0]["dimts"]."','".$row[0]["demo"]."','".$row[0]["veh_type"]."','".$row[0]["comment"]."','".$row[0]["immobilizer_type"]."','".$row[0]["payment_req"]."','".$row[0]["required"]."','".$row[0]["IP_Box"]."','".$row[0]["branch_id"]."','1','".$row[0]["Zone_area"]."','".$row[0]["atime_status"]."','".$row[0]["inter_branch"]."','".$row[0]["branch_type"]."','".$row[0]["instal_reinstall"]."','".$row[0]["approve_status"]."','1','".$row[0]["approve_date"]."','".$row[0]["fuel_sensor"]."','".$row[0]["bonnet_sensor"]."','".$row[0]["rfid_reader"]."','".$row[0]["speed_alarm"]."','".$row[0]["door_lock_unlock"]."','".$row[0]["temperature_sensor"]."','".$row[0]["duty_box"]."','".$row[0]["panic_button"]."')";
+               
+                $execute_inst=mysql_query($installation);
+        }
+    }
+           
+    $Updateapprovestatus="update installation_request set installation_status=1 where id=".$row_id;
+    mysql_query($Updateapprovestatus);
+   
+}
+
+
+if(isset($_GET['action']) && $_GET['action']=='total')
+    {
+         
+        echo mysql_num_rows($data);
+    }
+
+if(isset($_GET['action']) && $_GET['action']=='companyname')
+    {
+         
+        $sql="select `group`.name as company from matrix.group_users left join matrix.`group` on group_users.sys_group_id=`group`.id where group_users.sys_user_id=".$q;
+
+        $row=select_query_live_con($sql);
+
+        echo $row[0]["company"];
+    }
+
+
+if(isset($_GET['action']) && $_GET['action']=='creationdate')
+    {
+         
+        $sql="select * from matrix.users where id=".$q;
+
+        $row=select_query_live_con($sql);
+
+        echo date("d-M-Y",strtotime($row[0]["sys_added_date"]));
+    }
+   
+   
+    if(isset($_GET['action']) && $_GET['action']=='creationdate')
+    {
+         
+        $sql="select * from matrix.users where id=".$q;
+
+        $row=select_query_live_con($sql);
+
+        echo date("d-M-Y",strtotime($row[0]["sys_added_date"]));
+    }
+
+
+
+if(isset($_GET['action']) && $_GET['action']=='deviceImei')
+    {
+     
+    $sql1="select imei from matrix.devices where id in (select sys_device_id from matrix.services where veh_reg='".$veh_reg."') limit 1";
+    $row=select_query_live_con($sql1);
+     
+ echo $row[0]["imei"];
+    }
+   
+   
+if(isset($_GET['action']) && $_GET['action']=='deviceMobile')
+    {
+         
+    $sql1="select mobile_no from matrix.mobile_simcards where id in ( select sys_simcard from matrix.devices where id in (select sys_device_id from matrix.services where veh_reg='".$veh_reg."'))";
+    $row=select_query_live_con($sql1);
+     
+     echo $row[0]["mobile_no"];
+    }
+
+if(isset($_GET['action']) && $_GET['action']=='clientExtension')
+{
+    $Updateapprovestatus="update add_client_information set final_status=1,close_date='".date("Y-m-d H:i:s")."', 
+ req_close_by='".$_SESSION['username']."' where id=".$row_id;
+    select_query($Updateapprovestatus);
+   
+}
+
+if(isset($_GET['action']) && $_GET['action']=='clientExtensionDelete')
+{
+    $Updateapprovestatus="DELETE FROM internalsoftware.add_client_information WHERE  `id`=".$row_id;
+    select_query($Updateapprovestatus);
+   
+}
+
+
+if(isset($_GET['action']) && $_GET['action']=='Instaltiondate')
+    {
+         
+        $sql="select sys_created from matrix.services where veh_reg='".$veh_reg."' limit 1";
+ 
+        $row=select_query_live_con($sql);
+
+        echo date("d-M-Y",strtotime($row[0]["sys_created"]));
+    }
+   
+ 
+
+    if(isset($_GET['action']) && $_GET['action']=='getrowSales')
+    {
 ?>         
 <style type="text/css">
 
@@ -544,9 +553,9 @@ if(isset($_GET['action']) && $_GET['action']=='getrowSales')
 .dataright{float:left; width:400px; height:400px; margin-left:19px;}
 td{padding-right:20px; padding-left:20px;}
 </style>
-<?   
-  $RowId=$_GET["RowId"];
-  $tablename=$_GET["tablename"];
+    <?   
+            $RowId=$_GET["RowId"];
+            $tablename=$_GET["tablename"];
            
      
 
@@ -784,21 +793,14 @@ else
           $query = "SELECT * FROM ".$tablename." where id=".$RowId;
             $row=select_query($query);
 
-    ?><div id="databox">
-<div class="heading">Sub User Creation</div>
-<div class="dataleft"><table cellspacing="2" cellpadding="2">
-    <tbody>
- <tr><td>Date    </td><td><?echo date("d-M-Y h:i:s A",strtotime($row[0]["date"]));?></td></tr>
-<? /*if($row[0]["acc_manager"]=='saleslogin') {
-$account_manager=$row[0]["sales_manager"];
-}
-else {
-$account_manager=$row[0]["acc_manager"];
-}*/
-
-?>
-<tr><td>Request By</td><td><?echo $row[0]["acc_manager"];?></td></tr>
-<tr><td>Account Manager</td><td><?echo $row[0]["sales_manager"];?></td></tr>
+    ?><div > <div style=" padding-left: 50px;">
+    <h1>Sub User Creation
+</h1> </div>
+    <div class="table">
+    <table cellspacing="2" cellpadding="2" style=" padding-left: 100px;width: 500px;">
+     
+ <tr><td>Date    </td><td><?echo $row[0]["date"];?></td></tr>
+<tr><td>Account Manager     </td><td><?echo $row[0]["acc_manager"];?></td></tr>
 <? $sql="SELECT Userid AS id,UserName AS sys_username FROM addclient  WHERE Userid=".$row[0]["main_user_id"];
     $rowuser=select_query($sql);
     ?>
@@ -806,53 +808,24 @@ $account_manager=$row[0]["acc_manager"];
 
  <tr><td>Company Name     </td><td><?echo $row[0]["company"];?></td></tr>
 <tr><td>Total No Of Vehicle     </td><td><?echo $row[0]["tot_no_of_vehicles"];?></td></tr>
-<!--<tr><td>Vehicle to move     </td><td><?echo $row[0]["reg_no_of_vehicle_to_move"];?></td></tr>-->
-
-<tr><td>Vehicle to move </td><td><?php $vechile_no = explode(",",$row[0]["reg_no_of_vehicle_to_move"]);
-for($i=0;$i<=count($vechile_no);$i++){ if($i%3!=0){ echo $vechile_no[$i].", ";}else { echo "<br/>".$vechile_no[$i].", ";} }?></td></tr>
-
+<tr><td>Vehicle to move     </td><td><?echo $row[0]["reg_no_of_vehicle_to_move"];?></td></tr>
 <tr><td>Contact Person     </td><td><?echo $row[0]["contact_person"];?></td></tr>
 <tr><td>Contact Number     </td><td><?echo $row[0]["contact_number"];?></td></tr>
 <tr><td>Sub-User Name     </td><td><?echo $row[0]["name"];?></td></tr>
 <tr><td>Password</td><td><?echo $row[0]["req_sub_user_pass"];?></td></tr>
-
-<tr><td>Reason</td><td><?echo $row[0]["reason"];?></td></tr>
-
-</tbody></table></div>
-<div class="dataright">
-<table cellspacing="2" cellpadding="2"><tbody>
 <tr><td>Main User Separate</td><td><?echo $row[0]["billing_separate"];?></td></tr>
 <tr><td>Billing Name</td><td><?echo $row[0]["billing_name"];?></td></tr>
 <tr><td>Billing Address</td><td><?echo $row[0]["billing_address"];?></td></tr>
- <!--<tr><td>Admin Approval</td>  <td><?if($row[0]["approve_status"]==1) echo "Approved"; else echo "Pending Approval"?></td></tr>-->
-<tr><td><strong>Process Pending </strong></td>  <td><strong>
-<?  if($row[0]["sub_user_status"]==2 || (($row[0]["support_comment"]!="" || $row[0]["admin_comment"]!="") && $row[0]["sales_comment"]==""))
-    {echo "Reply Pending at Request Side";}
-    elseif($row[0]["approve_status"]==0 && $row[0]["forward_req_user"]!="" && $row[0]["forward_back_comment"]=="" && $row[0]["sub_user_status"]==1)   
-    {echo "Pending Admin Approval (Req Forward to ".$row[0]["forward_req_user"].")";}
-    elseif($row[0]["approve_status"]==0 && $row[0]["final_status"]==0 && $row[0]["sub_user_status"]==1){echo "Pending Admin Approval";}
-    elseif($row[0]["approve_status"]==1 && $row[0]["sub_user_status"]==1 && $row[0]["final_status"]!=1){echo "Pending at Tech Support Team";}
-    elseif($row[0]["final_status"]==1){echo "Process Done";}?></strong></td></tr>
+<tr><td>Reason</td><td><?echo $row[0]["reason"];?></td></tr>
 
+<tr><td colspan="2">-------------------------------------------</td> </tr>
+
+ <tr><td>Admin Approval</td>  <td><?if($row[0]["approve_status"]==1) echo "Approved"; else echo "Pending Approval"?></td></tr>
 <tr><td>Account Comment</td>  <td><?echo $row[0]["account_comment"];?></td></tr>
-<tr><td>Sales Comment</td>  <td><?echo $row[0]["sales_comment"];?></td></tr>
 <tr><td>Support Comment</td><td><?echo $row[0]["support_comment"];?></td></tr>
 <tr><td>Admin Comment</td><td><?echo $row[0]["admin_comment"];?></td></tr>
-<tr><td>Req Forwarded to</td><td><?echo $row[0]["forward_req_user"];?></td></tr>
-<tr><td>Forward Comment</td><td><?echo $row[0]["forward_comment"];?></td></tr>
-<tr><td>F/W Request Back Comment</td><td><?echo $row[0]["forward_back_comment"];?></td></tr><tr><td>Approval Date</td><td><?
-if($row[0]["approve_status"]==1 && $row[0]["approve_date"]!='')
-{
-echo date("d-M-Y h:i:s A",strtotime($row[0]["approve_date"]));
-}
-else
-{
-    echo "";
-}
-
-?></td></tr>
 <tr><td>Closed Date</td><td><?
-if($row[0]["final_status"]==1 && $row[0]["close_date"]!='')
+if($row[0]["final_status"]==1)
 {
 echo date("d-M-Y h:i:s A",strtotime($row[0]["close_date"]));
 }
@@ -861,9 +834,8 @@ else
     echo "";
 }
 
-?></td>
-    </tr>
-</tbody>
+?></td></tr>
+
     </table>
     </div>
     </div>
@@ -961,10 +933,10 @@ else
     </div>
 
 
-    <? }
+    <?}
     else If($tablename=="software_request")
         {
-          $query = "SELECT * FROM ".$tablename." where id=".$RowId;
+        $query = "SELECT * FROM ".$tablename." where id=".$RowId;
             $row=select_query($query);
 
 

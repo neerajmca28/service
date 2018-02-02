@@ -412,4 +412,17 @@ function Vehicle_onmap(action,latitude,longitude,DivId)
     });
 }
 
+function getRequestClose(ClientId,DivId){
+    $.ajax({
+        type:"GET",
+        url:Path +"userInfo.php?action=getRequestCloseStatus",
+        data:"user_id="+ClientId,
+        success:function(msg){
+          //alert(msg);
+            document.getElementById("popup1").innerHTML = msg;
+                        
+        }
+    });
+}
+
  
